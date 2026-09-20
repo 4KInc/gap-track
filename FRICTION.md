@@ -46,13 +46,19 @@ given task, there is no entry. An empty section is an honest section.
   `NONINTERACTIVE=true bash get_vvm.sh` completed successfully: SDK 0.24.12044
   installed to `~/vega`, VVD included, without Homebrew, without Rosetta, and
   without ever entering a password.
+  A full `react-native build-vega --build-type Debug` then also completed on the
+  same machine, producing `gaptrack_x86_64.vpkg` (2.9 MB, OS version 1.2) with
+  `vega vtbuild exited with code 0`. So none of `binutils coreutils gawk
+  findutils grep gnu-sed lz4 watchman` — nor Rosetta 2 — was required to install
+  the SDK, generate a project, or build it.
 - **Severity:** Medium. Not a blocker, but it wrongly tells developers without
   admin rights on a managed machine that they cannot start — and Rosetta 2 is
   requested on Apple Silicon without the docs saying which component needs it.
 - **Workaround:** Install `jq` standalone, then
   `NONINTERACTIVE=true bash get_vvm.sh`.
-- **Actionable suggestion:** Split the prerequisites into "required to install"
-  (curl, tar, jq) and "required to build" (the GNU toolchain, watchman), and say
+- **Actionable suggestion:** Split the prerequisites into "required" (curl, tar,
+  jq) and "recommended" (the GNU toolchain and watchman, which improve the Metro
+  dev loop but gate nothing in install, generate or build), and say
   plainly that the macOS installer needs no elevated privileges. Documenting
   `NONINTERACTIVE=true` on the install page would also help CI setups — it is
   supported by the script but appears nowhere in the docs.
