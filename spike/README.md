@@ -1,86 +1,84 @@
 # Runtime probes
 
-Four probes against three questions. Everything else in the project waits on
-these answers, because two of the three change what gets built.
+Four probes against the assumptions the whole build rests on. Two of them can
+change what gets built, so nothing else starts until `RESULTS.md` has numbers.
 
-Delete this directory once the answers are in `RESULTS.md`.
+The probe code lives in [`../src/probes/`](../src/probes) and the harness screen
+in [`../src/SpikeScreen.tsx`](../src/SpikeScreen.tsx). This directory holds the
+method and the results.
 
 ## The questions
 
 | Probe | Question | If it fails |
 |---|---|---|
-| **C · clock** | What is the real resolution of `currentTime`, and how much does it jitter? | Widen the margin, or schedule cues on their own timebase seeded from the playhead |
-| **A · concurrent** | Can a cue element sound while video audio plays? | **Pause-and-Describe becomes the primary mode.** The product still ships |
-| **B · ducking** | Can programme volume drop independently while a cue plays? | Synthesise cues louder, leave the mix alone |
-| **A2 · placement** | Across 10 runs, how far off target does a cue actually start? | Margin comes from the worst run, never the median |
+| **C · clock** | Real resolution and jitter of `currentTime` | Widen the margin, or run cues on a separate timebase |
+| **A · usage** | Does declaring `USAGE_ACCESSIBILITY` buy concurrent playback? | **Pause-and-Describe becomes the primary mode** |
+| **B · ducking** | Does the programme duck — by hand, or by itself? | Synthesise cues louder, leave the mix alone |
+| **A2 · placement** | Across 10 runs, how far off target does a cue start? | Margin comes from the worst run, never the median |
 
 Run **C first.** Concurrency results are uninterpretable if the clock is unreliable.
 
-## Setup
+## What Probe A actually tests
 
-```bash
-# 1. Scaffold, if you haven't
-vega init gap-track-spike && cd gap-track-spike
+The SDK exposes audio attributes on the `AudioPlayer` constructor:
 
-# 2. Drop these files in
-cp -r /path/to/spike/src ./src
-
-# 3. Two local assets — local, not remote. Network jitter would land inside
-#    the timing you are measuring.
-mkdir -p assets
-#   assets/clip.mp4        ~2 min, CC-BY, with real dialogue and real silences.
-#                          Sintel works. Note the attribution now, not in week four.
-#   assets/cue-1400ms.wav  any speech ≈1.4s. Say "she folds the letter" into
-#                          a voice memo. Polly comes later; this probe only
-#                          needs a known-length sound.
-
-# 4. Run
-vega virtual-device start
-vega run-app <vpkg-path> <app-id> -d VirtualDevice
+```ts
+new AudioPlayer(AudioContentType.CONTENT_TYPE_SPEECH, AudioUsageType.USAGE_ACCESSIBILITY)
 ```
 
-Then repeat every probe on a physical Fire TV Stick. **The VVD and the stick can
-disagree about audio, and the stick is the one that counts.** Label each run in
-`RESULTS.md` accordingly.
+`USAGE_ACCESSIBILITY` is the platform's own category for accessibility prompts.
+On an attribute-driven audio policy that is normally what earns a stream
+concurrent playback alongside media — and often automatic ducking of the media
+stream, handled by the system rather than by the app.
 
-## Before you run: confirm two imports
+So the question is not "can two streams play at once" but **"does declaring the
+right usage make the platform do it for us."** Probe A runs the identical test
+twice — once `USAGE_MEDIA`, once `USAGE_ACCESSIBILITY` — and compares.
 
-`src/SpikeScreen.tsx` imports `VideoPlayer` and `KeplerVideoView` from
-`@amazon-devices/react-native-w3cmedia`. Amazon's docs show those names, and
-also document an `HTMLAudioElement` class, but the export surface moves between
-SDK versions.
+If accessibility wins and media does not, that attribute is the unlock, manual
+ducking may be unnecessary, and the app gets more device-native rather than less.
 
-Open `node_modules/@amazon-devices/react-native-w3cmedia`, match the real names,
-fix the import, and delete the `TODO(confirm)` comments. If `HTMLAudioElement`
-turns out to be the right handle for the cue element, use it — it is the more
-honest fit, and its own `volume` property is what Probe B needs.
+## Running
+
+```bash
+cd ..                       # repo root
+npm install
+npm run build:debug
+
+vega virtual-device start
+vega run-app <packageFile> com.fourkinc.gaptrack -d VirtualDevice
+```
+
+Point `index.js` at `SpikeScreen` instead of `App` while probing, then put it back.
+
+Then repeat every probe on a physical Fire TV Stick. **The virtual device and
+the stick can disagree about audio, and the stick is the one that counts.**
+Label each run in `RESULTS.md`.
+
+## Two assets you need to supply
+
+Local files, not URLs — a network fetch would put bandwidth jitter inside the
+timing being measured. Both are gitignored.
+
+- `src/assets/clip.mp4` — ~2 min, CC-BY, with real dialogue and real silences.
+  Sintel works. Record the attribution in `assets/ATTRIBUTION.md` now.
+- `src/assets/cue-1400ms.wav` — any speech around 1.4s. Say *"she folds the
+  letter"* into a voice memo. Polly comes later; this probe only needs a sound
+  of known length.
 
 ## The probes cannot hear
 
-This is the important caveat and the reason Probe A returns two verdicts.
-
 A media element will report `paused === false` while routed to a sink producing
 no sound. Machine evidence — does the clock advance, does `volume` read back —
-is **necessary but not sufficient**. So set the "what you heard" verdict on
+is **necessary but not sufficient**, so set the "what you heard" verdict on
 screen before trusting any result.
 
 **A machine PASS with a human FAIL is the most likely failure here**, and it is
-precisely the outcome that would otherwise surface in week three.
+exactly the outcome that would otherwise surface in week three.
 
-## Recording results
+## Recording
 
-Every run appends to `RESULTS.md`. Copy any thrown error **verbatim** — exact
-strings are what separate a friction log that scores from one that reads as
-filler, and you will not remember the wording on 20 October.
-
-## What the answers unlock
-
-```
-Probe C  ─→  the safety margin, as a measured number rather than a guess
-Probe A  ─→  Adaptive Description as primary, or Pause-and-Describe as primary
-Probe B  ─→  ducking, or louder cues
-Probe A2 ─→  the margin's floor: worst run × 1.5, never the median
-```
-
-Once these four lines have numbers in them, the engine phase can start and the
-build plan's first gate is met: *a cue lands in a silence on real hardware.*
+Fill in `RESULTS.md` as you go, and copy any thrown error **verbatim** into
+`../FRICTION.md`. Exact strings are what separate a friction log that scores
+from one that reads as filler, and you will not remember the wording on
+20 October.

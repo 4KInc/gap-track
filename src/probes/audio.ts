@@ -19,10 +19,17 @@
 
 export type HumanVerdict = 'heard-both' | 'heard-video-only' | 'heard-cue-only' | 'heard-neither';
 
+/**
+ * Structural subset of the SDK's MediaPlayer that the probes touch.
+ * VideoPlayer and AudioPlayer both satisfy this (verified against
+ * react-native-w3cmedia@2.3.2). `initialize()` must already have been awaited
+ * before any of these are called.
+ */
 export interface MediaLike {
   currentTime: number;
   paused: boolean;
   volume: number;
+  src?: string;
   play(): Promise<void> | void;
   pause(): void;
 }

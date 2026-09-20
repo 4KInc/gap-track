@@ -25,3 +25,19 @@ spike/assets/*.m4a
 # Logs
 *.log
 npm-debug.log*
+
+# --- from vega project generate ---
+
+# --- from vega project generate ---
+*.iml
+*.swp
+.idea
+.DS_Store
+.vscode
+.tmp
+
+dist
+build
+node_modules
+CMakeUserPresets.json
+npm-debug.log

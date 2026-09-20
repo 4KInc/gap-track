@@ -92,7 +92,7 @@ opt-in. The vocabulary is fixed; custom intents are not registrable.
 
 ## Platform facts, verified 20 Sep 2026
 
-- React Native for Vega is pinned to **0.72** with Fabric and TurboModules
+- React Native for Vega is pinned to **0.83** (SDK 0.24; the 0.72 pin applied to SDK 0.22) with Fabric and TurboModules
 - Media is the W3C Media API via `@amazon-devices/react-native-w3cmedia`, over GStreamer
 - `HTMLAudioElement` exists as a class distinct from the video element, with its own standard `volume`
 - The Vega Virtual Device needs no hardware; a physical stick is still required for real performance testing
