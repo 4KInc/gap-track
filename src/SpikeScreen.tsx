@@ -25,7 +25,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, Image } from 'react-native';
 
 import {
   AudioPlayer,
@@ -46,9 +46,10 @@ import {
 } from './probes/audio';
 
 // Local files only. A network fetch would put bandwidth jitter inside the very
-// timing being measured. See spike/README.md for what to drop in.
-const CLIP_SRC = 'file:///pkg/assets/clip.mp4';
-const CUE_SRC = 'file:///pkg/assets/cue-1400ms.wav';
+// timing being measured. Resolved through Metro rather than hardcoded, so the
+// URI is whatever the packager actually produced.
+const CLIP_SRC = Image.resolveAssetSource(require('./assets/clip.mp4')).uri;
+const CUE_SRC = Image.resolveAssetSource(require('./assets/cue.wav')).uri;
 
 type ProbeKey = 'clock' | 'usage' | 'ducking' | 'placement';
 
@@ -127,8 +128,8 @@ export default function SpikeScreen(): React.JSX.Element {
       try {
         if (key === 'clock') {
           await v.play();
-          append('Probe C — 60s. Do not touch the remote.');
-          const r = await probeClock(v, { label: 'LABEL THIS: VVD or stick', durationMs: 60_000 });
+          append('Probe C — 9s (clip is 10s). Do not touch the remote.');
+          const r = await probeClock(v, { label: 'LABEL THIS: VVD or stick', durationMs: 9_000 });
           v.pause();
           append(formatClockReport(r));
         }

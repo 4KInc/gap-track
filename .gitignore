@@ -18,9 +18,9 @@ metro.config.js.bak
 aws-exports.js
 
 # Spike media (large, licensed separately — see spike/README.md)
-spike/assets/*.mp4
-spike/assets/*.wav
-spike/assets/*.m4a
+src/assets/*.mp4
+src/assets/*.wav
+src/assets/*.m4a
 
 # Logs
 *.log
