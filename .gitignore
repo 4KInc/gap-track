@@ -1,0 +1,27 @@
+# Vega / React Native
+node_modules/
+.vega/
+build/
+dist/
+*.vpkg
+.metro-health-check*
+metro.config.js.bak
+
+# macOS
+.DS_Store
+
+# Env & credentials — never commit these
+.env
+.env.*
+!.env.example
+*.pem
+aws-exports.js
+
+# Spike media (large, licensed separately — see spike/README.md)
+spike/assets/*.mp4
+spike/assets/*.wav
+spike/assets/*.m4a
+
+# Logs
+*.log
+npm-debug.log*
