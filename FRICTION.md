@@ -165,3 +165,108 @@ given task, there is no entry. An empty section is an honest section.
   not supported", "use MediaSource" — so the failure is self-describing. Better
   still, have `src` assignment of an unsupported scheme throw synchronously
   rather than resolving `play()` and leaving the app apparently playing.
+
+### 6. The one file you must copy is marked "PROPRIETARY/CONFIDENTIAL" inside an MIT-0 repo
+
+- **Task attempted:** Reuse the Shaka Player integration from the official
+  [vega-video-sample](https://github.com/AmazonAppDev/vega-video-sample), which
+  the documentation points to as the way to play media on Vega.
+- **Steps taken:** Cloned the sample and opened
+  `src/w3cmedia/shakaplayer/ShakaPlayer.ts` — the file the README names as the
+  helper that "instantiates the Shaka player class and links it to the W3C
+  Media API".
+- **Expected result:** A permissively licensed sample, consistent with the
+  repository licence.
+- **Actual result:** That file carries the header:
+
+  > `AMAZON PROPRIETARY/CONFIDENTIAL`
+  > `You may not use this file except in compliance with the terms and`
+  > `conditions set forth in the accompanying LICENSE.TXT file.`
+
+  There is no `LICENSE.TXT` in the repository. The actual `LICENSE` is
+  **MIT No Attribution**, which grants use, copy, modify and distribute without
+  restriction. It is the only file in `src/` carrying that header — all 1 of
+  them — so it reads as a stale internal header that survived the move to a
+  public sample.
+- **Severity:** Medium. Nothing technical breaks, but the headline integration
+  file of the official sample appears to forbid the use the repository licence
+  permits, and it names a licence file that does not exist. Any developer doing
+  licence diligence before shipping — which is exactly what a public,
+  open-source submission requires — stops here.
+- **Workaround:** Rely on the repository `LICENSE` (MIT-0), which governs, and
+  treat the file header as stale. Shaka Player itself is Apache-2.0 and
+  correctly recorded in `LICENSE-THIRD-PARTY`.
+- **Actionable suggestion:** Delete the proprietary header from
+  `ShakaPlayer.ts`, or replace it with the MIT-0 notice used implicitly by the
+  rest of the repository. A one-line fix that removes a real adoption blocker.
+
+### 7. The Shaka build script assumes `kepler` on PATH and a `python` that macOS no longer ships
+
+- **Task attempted:** Run `shaka-setup/build.sh` from the official
+  vega-video-sample to produce the Shaka Player artifacts the W3C media player
+  needs.
+- **Steps taken:** Installed the Vega SDK, sourced `~/vega/env`, cloned the
+  sample, ran `./build.sh`. All ~45 Amazon patches applied to Shaka v4.8.5
+  successfully; the failure came at the compile step.
+- **Expected result:** A compiled `dist/shaka-player.compiled.js`.
+- **Actual result:** Two failures in sequence, verbatim:
+
+  ```
+  ./build.sh: line 110: kepler: command not found
+  Vega build failed, attempting direct build
+  env: python: No such file or directory
+  Build failed. Resetting state
+  ```
+
+  The first is because the script invokes `kepler`, the backward-compatibility
+  symlink the installer creates alongside `vega`, but `~/vega/env` is not
+  sourced by the script and a fresh non-login shell will not have it. The
+  installer itself prints "Use `vega` directly for all future invocations",
+  so the build script is calling the name its own installer deprecates.
+
+  The second is because the fallback path invokes `python`. macOS has not
+  shipped a `python` binary since Monterey — only `python3`. So on a current
+  Mac, which is one of the two supported platforms, **both** the primary and
+  the fallback build paths fail.
+- **Severity:** High. It blocks the documented route to playing any media at
+  all, and the `ERR` trap resets the repository, so the ~45-patch application
+  is repeated on every retry.
+- **Workaround:** `export PATH="$HOME/vega/bin:$PATH"` so `kepler` resolves,
+  and put a `python` shim on PATH: `printf '#!/bin/sh\nexec python3 "$@"\n' >
+  ~/.local/bin/python && chmod +x ~/.local/bin/python`.
+- **Actionable suggestion:** Source `~/vega/env` at the top of `build.sh`, or
+  call `vega` rather than the deprecated `kepler`. Prefer `python3` with a
+  fallback to `python`, not the reverse. And check for both before applying 45
+  patches, so the failure arrives in seconds rather than after the slowest part
+  of the build.
+
+### 8. The Shaka build needs a JDK, and nothing says so until 45 patches in
+
+- **Task attempted:** Produce `shaka-player.compiled.js` via
+  `shaka-setup/build.sh`.
+- **Steps taken:** Resolved entry 7 (`kepler` on PATH, `python` shim), reran.
+  All ~45 patches reapplied, linting passed, then the compile step failed.
+- **Expected result:** A compiled Shaka bundle.
+- **Actual result:** Verbatim, on both the Vega build path and the direct
+  fallback:
+
+  ```
+  The operation couldn't be completed. Unable to locate a Java Runtime.
+  Please visit http://www.java.com for information on installing Java.
+  [ERROR] Build failed
+  ```
+
+  Shaka compiles with Closure Compiler, which requires a JRE. macOS ships
+  `/usr/bin/java` as a **stub** that exists on PATH and fails when invoked, so
+  a `command -v java` check passes on a machine with no JDK at all. Neither the
+  sample's prerequisites nor the Vega SDK prerequisites mention Java.
+- **Severity:** High. It blocks the only supported route to media playback, and
+  the `ERR` trap resets the Shaka repository on failure, so every retry
+  re-applies all 45 patches before failing again at the same point.
+- **Workaround:** Install a JDK without admin rights — extract a Temurin
+  tarball to `~/.local/jdk` and export `JAVA_HOME`. Build then succeeds.
+- **Actionable suggestion:** Add a JDK to the documented prerequisites, and
+  preflight it in `build.sh` with `java -version` (not `command -v java`, which
+  the macOS stub defeats) before applying any patches. Combined with entries 7,
+  this is three separate environment prerequisites discovered one failed build
+  at a time, each after the slowest part of the script.

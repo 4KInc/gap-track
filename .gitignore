@@ -41,3 +41,12 @@ build
 node_modules
 CMakeUserPresets.json
 npm-debug.log
+# --- vendored Shaka ---
+# The compiled player IS committed (see LICENSE-THIRD-PARTY) so the repo builds
+# without a 20-minute Closure build. A blanket `dist/` rule above would hide it,
+# and git cannot re-include a file underneath an ignored directory, so the
+# directory has to be un-ignored first.
+!src/w3cmedia/shakaplayer/dist/
+src/w3cmedia/shakaplayer/dist/*
+!src/w3cmedia/shakaplayer/dist/shaka-player.compiled.js
+!src/w3cmedia/shakaplayer/dist/shaka-player.compiled.d.ts
