@@ -185,9 +185,14 @@ given task, there is no entry. An empty section is an honest section.
 
   There is no `LICENSE.TXT` in the repository. The actual `LICENSE` is
   **MIT No Attribution**, which grants use, copy, modify and distribute without
-  restriction. It is the only file in `src/` carrying that header — all 1 of
-  them — so it reads as a stale internal header that survived the move to a
-  public sample.
+  restriction.
+
+  It is not one file. `ShakaPlayer.ts` is the only checked-in file carrying the
+  header, but the build generates seven more that carry it too —
+  `PlayerInterface.ts` and all six polyfills — because they are unpacked from
+  `shaka-rel-v4.8.5-r1.2.tar.gz` at install time and are gitignored, so they are
+  invisible until you run the build. **Every file the integration requires is
+  marked proprietary-confidential**, in a repository licensed MIT-0.
 - **Severity:** Medium. Nothing technical breaks, but the headline integration
   file of the official sample appears to forbid the use the repository licence
   permits, and it names a licence file that does not exist. Any developer doing

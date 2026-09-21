@@ -37,6 +37,7 @@ import {
   AudioUsageType,
   KeplerVideoSurfaceView,
 } from '@amazon-devices/react-native-w3cmedia';
+import { ShakaPlayer } from './w3cmedia/shakaplayer/ShakaPlayer';
 
 import { probeClock, formatClockReport } from './probes/clock';
 import {
@@ -48,13 +49,19 @@ import {
   type MediaLike,
 } from './probes/audio';
 
-// Local files only. A network fetch would put bandwidth jitter inside the very
-// timing being measured. Resolved through Metro rather than hardcoded, so the
-// URI is whatever the packager actually produced.
-const CLIP_SRC = Image.resolveAssetSource(require('./assets/clip.mp4')).uri;
+// Three sources, because the failure mode is still ambiguous. A packaged
+// file:// asset was rejected with SRC_NOT_SUPPORTED at 0ms — but the official
+// sample DOES assign src directly for mp4 (loadStaticMediaPlayer), just over
+// https. So the open question is whether the scheme is the problem or
+// progressive playback is, and those have very different consequences.
+const PACKAGED_SRC = Image.resolveAssetSource(require('./assets/clip.mp4')).uri;
+const HTTPS_SRC =
+  'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4';
+const HLS_SRC =
+  'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8';
 const CUE_SRC = Image.resolveAssetSource(require('./assets/cue.wav')).uri;
 
-type ProbeKey = 'clock' | 'usage' | 'ducking' | 'placement';
+type ProbeKey = 'clock' | 'sources' | 'usage' | 'ducking' | 'placement';
 
 export default function SpikeScreen(): React.JSX.Element {
   const [log, setLog] = useState('Initialising players…');
@@ -166,7 +173,7 @@ export default function SpikeScreen(): React.JSX.Element {
       try {
         const v = new VideoPlayer();
         await v.initialize();
-        v.src = CLIP_SRC;
+        v.src = HTTPS_SRC;
         v.load(); // setting src alone does not begin the resource selection
 
         // The cue element under test, declared as an accessibility prompt.
@@ -196,8 +203,8 @@ export default function SpikeScreen(): React.JSX.Element {
         setStatus('players ready');
         attachSurface(); // the surface may already be waiting
         append('Players initialised. Video + two cue players (accessibility, media).');
-        append(`clip uri: ${CLIP_SRC}`);
-        append(`cue  uri: ${CUE_SRC}`);
+        append(`video src (https progressive): ${HTTPS_SRC.split('/').pop()}`);
+        append(`packaged (known to fail): ${PACKAGED_SRC}`);
       } catch (err) {
         setStatus(`INIT FAILED — ${String(err)}`);
         append(`INIT THREW: ${String(err)}\n^ friction log material. Copy it verbatim.`);
@@ -237,6 +244,39 @@ export default function SpikeScreen(): React.JSX.Element {
           dumpMedia('after probe', v);
           v.pause();
           append(formatClockReport(r));
+        }
+
+        if (key === 'sources') {
+          append('Which sources will this player actually accept?');
+
+          for (const [label, uri] of [
+            ['https progressive mp4', HTTPS_SRC],
+            ['packaged file://', PACKAGED_SRC],
+          ] as [string, string][]) {
+            const probe = new VideoPlayer();
+            await probe.initialize();
+            probe.src = uri;
+            probe.load();
+            const ok = await awaitMetadata(probe, label, 8000);
+            dumpMedia(label, probe);
+            append(`${label}: ${ok ? 'ACCEPTED' : 'REJECTED'}`);
+            try { probe.deinitialize(); } catch { /* best effort */ }
+          }
+
+          append('\nNow HLS through Shaka…');
+          try {
+            const shakaEl = new VideoPlayer();
+            await shakaEl.initialize();
+            const sp = new ShakaPlayer(shakaEl as never, {
+              secure: false, abrEnabled: false,
+            });
+            sp.load({ uri: HLS_SRC }, false);
+            const ok = await awaitMetadata(shakaEl, 'shaka hls', 15000);
+            dumpMedia('shaka hls', shakaEl);
+            append(`shaka hls: ${ok ? 'ACCEPTED' : 'REJECTED'}`);
+          } catch (err) {
+            append(`shaka THREW: ${String(err)}`);
+          }
         }
 
         if (key === 'usage') {
@@ -319,7 +359,7 @@ export default function SpikeScreen(): React.JSX.Element {
       <Text style={styles.lastEvent} numberOfLines={1}>last: {lastEvent}</Text>
       <Text style={styles.label}>Probes</Text>
       <View style={styles.row}>
-        {(['clock', 'usage', 'ducking', 'placement'] as ProbeKey[]).map((k) => (
+        {(['clock', 'sources', 'usage', 'ducking', 'placement'] as ProbeKey[]).map((k) => (
           <Pressable
             key={k}
             focusable

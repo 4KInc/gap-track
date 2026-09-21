@@ -1,8 +1,8 @@
 /*
- * Copyright 2022 - 2025 Amazon.com, Inc. or its affiliates. All rights reserved.
+ * Copyright Amazon.com, Inc. or its affiliates. All rights reserved.
  *
  * Vendored from github.com/AmazonAppDev/vega-video-sample, which is licensed
- * MIT No Attribution. The upstream copy of this file carries a stale
+ * MIT No Attribution. The upstream copies carry a stale
  * "AMAZON PROPRIETARY/CONFIDENTIAL" header referring to a LICENSE.TXT that does
  * not exist in that repository; the repository LICENSE (MIT-0) governs. See
  * FRICTION.md entry 6.

@@ -1,15 +1,13 @@
 /*
- * Copyright 2022-2025 Amazon.com, Inc. or its affiliates. All rights reserved.
+ * Copyright Amazon.com, Inc. or its affiliates. All rights reserved.
  *
- * AMAZON PROPRIETARY/CONFIDENTIAL
+ * Vendored from github.com/AmazonAppDev/vega-video-sample, which is licensed
+ * MIT No Attribution. The upstream copies carry a stale
+ * "AMAZON PROPRIETARY/CONFIDENTIAL" header referring to a LICENSE.TXT that does
+ * not exist in that repository; the repository LICENSE (MIT-0) governs. See
+ * FRICTION.md entry 6.
  *
- * You may not use this file except in compliance with the terms and
- * conditions set forth in the accompanying LICENSE.TXT file.
- *
- * THESE MATERIALS ARE PROVIDED ON AN "AS IS" BASIS. AMAZON SPECIFICALLY
- * DISCLAIMS, WITH RESPECT TO THESE MATERIALS, ALL WARRANTIES, EXPRESS,
- * IMPLIED, OR STATUTORY, INCLUDING THE IMPLIED WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+ * Shaka Player itself is Apache-2.0, (c) Google LLC — see LICENSE-THIRD-PARTY.
  */
 
 // @ts-nocheck

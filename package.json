@@ -19,24 +19,27 @@
     "release": "npm-run-all lint test build:app"
   },
   "dependencies": {
+    "@amazon-devices/kepler-media-controls": "~1.0.25",
     "@amazon-devices/react-native-kepler": "~4.0.0",
+    "@amazon-devices/react-native-w3cmedia": "~2.3.2",
+    "base-64": "^1.0.0",
     "react": "19.2.0",
     "react-native": "0.83.0",
-    "@amazon-devices/react-native-w3cmedia": "~2.3.2",
-    "@amazon-devices/kepler-media-controls": "~1.0.25"
+    "xmldom": "^0.6.0"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
-    "@amazon-devices/kepler-cli-platform": "^0",
     "@amazon-devices/eslint-plugin-kepler": "^0.1.4",
+    "@amazon-devices/kepler-cli-platform": "^0",
     "@react-native-community/cli": "20.0.0",
     "@react-native/babel-preset": "0.83.0",
     "@react-native/eslint-config": "0.83.0",
     "@react-native/metro-config": "0.83.0",
     "@react-native/typescript-config": "0.83.0",
     "@testing-library/react-native": "^13.0.0",
+    "@types/base-64": "^1.0.2",
     "@types/jest": "^29.5.14",
     "@types/react": "^19.2.0",
     "@types/react-test-renderer": "^19.1.0",
