@@ -74,6 +74,7 @@ export default function SpikeScreen(): React.JSX.Element {
   const firstBtn = useRef<View | null>(null);
 
   const video = useRef<VideoPlayer | null>(null);
+  const shaka = useRef<ShakaPlayer | null>(null);
   // The surface and the player arrive independently and in either order, so
   // neither can assume the other exists. Park the handle and attach when both
   // are present — whichever lands second does the work.
@@ -173,8 +174,11 @@ export default function SpikeScreen(): React.JSX.Element {
       try {
         const v = new VideoPlayer();
         await v.initialize();
-        v.src = HTTPS_SRC;
-        v.load(); // setting src alone does not begin the resource selection
+        // Neither file:// nor a plain progressive MP4 plays — measured, see
+        // FRICTION.md entry 5. Shaka over fragmented HLS is the working path.
+        const sp = new ShakaPlayer(v as never, { secure: false, abrEnabled: false });
+        sp.load({ uri: HLS_SRC }, false);
+        shaka.current = sp;
 
         // The cue element under test, declared as an accessibility prompt.
         const a = new AudioPlayer(
@@ -203,8 +207,7 @@ export default function SpikeScreen(): React.JSX.Element {
         setStatus('players ready');
         attachSurface(); // the surface may already be waiting
         append('Players initialised. Video + two cue players (accessibility, media).');
-        append(`video src (https progressive): ${HTTPS_SRC.split('/').pop()}`);
-        append(`packaged (known to fail): ${PACKAGED_SRC}`);
+        append(`video: Shaka + HLS — ${HLS_SRC.split('/').slice(-2).join('/')}`);
       } catch (err) {
         setStatus(`INIT FAILED — ${String(err)}`);
         append(`INIT THREW: ${String(err)}\n^ friction log material. Copy it verbatim.`);
@@ -234,7 +237,7 @@ export default function SpikeScreen(): React.JSX.Element {
       try {
         if (key === 'clock') {
           dumpMedia('before load wait', v);
-          await awaitMetadata(v, 'video');
+          await awaitMetadata(v, 'video', 20000); // manifest + first segments
           dumpMedia('after metadata wait', v);
           await v.play();
           await new Promise<void>((resolve) => { setTimeout(() => resolve(), 700); });

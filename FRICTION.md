@@ -128,43 +128,51 @@ given task, there is no entry. An empty section is an honest section.
   call. Better still, have `setSurfaceHandle` on an uninitialised player either
   queue the handle or throw, rather than doing nothing.
 
-### 5. A packaged local file cannot be played with `src`; MSE is mandatory, and nothing says so
+### 5. Neither a packaged file nor a plain progressive MP4 will play; only MSE works
 
-- **Task attempted:** Play a short bundled `.mp4` and `.wav` from app assets, to
-  measure playhead behaviour and concurrent audio.
-- **Steps taken:** Resolved the packaged URIs with
-  `Image.resolveAssetSource(require('./assets/clip.mp4'))`, which returned
-  `file:///pkg/bundle/assets/src/assets/clip.mp4`. Confirmed both files are in
-  the build output at that exact relative path and at full size (4,999,379 and
-  99,176 bytes). Assigned `player.src = uri`, called `player.load()`, then
-  polled `readyState`.
-- **Expected result:** `readyState` reaching `HAVE_METADATA`, a real `duration`,
-  and a `currentTime` that advances on `play()`.
-- **Actual result:** The element errors **immediately**, at 0ms, before any
-  fetch or decode could have occurred:
-  `error: code=4 (SRC_NOT_SUPPORTED) msg=""`, with `duration=NaN` and
-  `readyState=0 (HAVE_NOTHING)`. The message string is empty, so the error
-  carries no indication of *what* about the source was unsupported — scheme,
-  container, or codec.
+- **Task attempted:** Play short media from app assets, to measure playhead
+  behaviour and concurrent audio.
+- **Steps taken:** Built a probe that tries three sources in sequence through
+  the same `VideoPlayer`, each with `src` assigned, `load()` called, and
+  `readyState` polled to an 8s timeout.
+- **Expected result:** At least the progressive https MP4 to play, since the
+  official sample's `loadStaticMediaPlayer` assigns `src` directly for MP4.
+- **Actual result:** Measured on device (VVD, SDK 0.24.12044):
 
-  The failure is silent in the worst way: `play()` still resolves and `paused`
-  still flips to `false`, so an app looks like it is playing. The only symptoms
-  are a black surface and a `currentTime` frozen at 0 — which read as a decode
-  or rendering problem and send you looking in the wrong subsystem.
-- **Severity:** High. It blocks the most obvious first thing any developer
-  tries — play a bundled asset — and the diagnostics actively mislead.
-- **Workaround:** Feed the player through Media Source Extensions instead. The
-  official [vega-video-sample](https://github.com/AmazonAppDev/vega-video-sample)
-  ports Shaka Player for exactly this, and every example in the
-  `react-native-w3cmedia` README uses `MediaSource` + `addSourceBuffer` +
-  `appendBuffer` for both video and audio. That is a strong implicit signal,
-  but it is never stated as a requirement.
-- **Actionable suggestion:** Say plainly in the W3C Media API overview that
-  progressive `src` assignment is not supported and MSE is required, ideally in
-  the first paragraph. Populate `MediaError.message` with the reason — "scheme
-  not supported", "use MediaSource" — so the failure is self-describing. Better
-  still, have `src` assignment of an unsupported scheme throw synchronously
-  rather than resolving `play()` and leaving the app apparently playing.
+  | Source | Verdict | Error |
+  |---|---|---|
+  | `file:///pkg/bundle/assets/.../clip.mp4` | REJECTED | `code=4 (SRC_NOT_SUPPORTED) msg=""` at **0ms** |
+  | `https://.../Big_Buck_Bunny_720_10s_5MB.mp4` | REJECTED | `code=3 (DECODE) msg="Error Occurred."` after **50ms** |
+  | `https://.../bipbop_adv_example_fmp4/master.m3u8` via Shaka | **ACCEPTED** | — |
+
+  These are two different failures, and the distinction matters. The `file://`
+  case is rejected at 0ms without a fetch: the **scheme** is refused, so a
+  packaged asset is unreachable no matter what it contains. The https case is
+  accepted as a source, fetched, and then fails in the demuxer at 50ms: a plain
+  non-fragmented MP4 cannot be progressively demuxed. Only MSE-fed fragmented
+  content plays.
+
+  Both failures are silent in the same misleading way: `play()` resolves,
+  `paused` flips to `false`, and the only symptoms are a black surface and a
+  `currentTime` frozen at 0 — which read as a rendering problem rather than a
+  source that was refused.
+
+  The `msg` field is empty on the scheme rejection and the uninformative
+  `"Error Occurred."` on the decode failure, so neither error says what was
+  wrong or what to do instead.
+- **Severity:** High. It blocks the first thing any developer tries — play a
+  bundled asset — and the official sample's own static path suggests a
+  progressive MP4 should work, which sends you looking for a codec problem.
+- **Workaround:** Serve fragmented content over https and drive it through the
+  Shaka port from
+  [vega-video-sample](https://github.com/AmazonAppDev/vega-video-sample).
+  Confirmed working against Apple's `bipbop` fMP4 HLS stream.
+- **Actionable suggestion:** State in the W3C Media API overview that `file://`
+  is not a supported scheme and that progressive MP4 is not demuxed — MSE is
+  required. Populate `MediaError.message` with the reason ("scheme not
+  supported", "use MediaSource") instead of `""` and `"Error Occurred."`. And
+  either make `loadStaticMediaPlayer` in the official sample work, or remove
+  it, since as written it implies a capability the player does not have.
 
 ### 6. The one file you must copy is marked "PROPRIETARY/CONFIDENTIAL" inside an MIT-0 repo
 
