@@ -86,3 +86,44 @@ given task, there is no entry. An empty section is an honest section.
 - **Actionable suggestion:** Surface the RN version each SDK release targets in
   the release notes and on the overview page, with the older pages clearly
   labelled by SDK version rather than by RN version.
+
+### 3. `scalingmode` is misspelled in the public surface-view API
+
+- **Task attempted:** Set the video scaling mode on `KeplerVideoSurfaceView`.
+- **Steps taken:** Read the prop's type union in
+  `node_modules/@amazon-devices/react-native-w3cmedia/dist/interface/KeplerVideoSurfaceView.d.ts`.
+- **Expected result:** The four documented modes spelled correctly.
+- **Actual result:** The union is
+  `'none' | 'fit' | 'strech' | 'fill'` — "stretch" is misspelled, and it is
+  also the documented default. The typo is in the public type, so the correct
+  spelling fails to compile and callers must reproduce the error deliberately.
+- **Severity:** Low. Cosmetic, but it is load-bearing in a type union, so it
+  cannot be corrected without a breaking change later.
+- **Workaround:** Write `'strech'`, or avoid the prop and accept the default.
+- **Actionable suggestion:** Accept both spellings now — widen the union to
+  `'stretch' | 'strech'` and treat them identically — then deprecate the
+  misspelling. Fixing it silently in a later release would break every app that
+  spelled it the required way.
+
+### 4. Surface handle and player initialise independently, with no guidance on ordering
+
+- **Task attempted:** Render video from a `VideoPlayer` into a
+  `KeplerVideoSurfaceView`.
+- **Steps taken:** Followed the package README, which shows
+  `onSurfaceViewCreated` calling `videoPlayer.setSurfaceHandle(handle)` directly.
+- **Expected result:** Video renders.
+- **Actual result:** Black surface. `VideoPlayer.initialize()` is asynchronous
+  and `onSurfaceViewCreated` fires when the native view mounts, so on a cold
+  start the callback runs while the player reference is still null and the
+  handle is silently dropped. Playback proceeds — `play()` resolves and
+  `currentTime` advances — so the only symptom is a black rectangle, which
+  reads as a decode or codec problem rather than a lifecycle one.
+- **Severity:** Medium. Costs real debugging time and points the developer at
+  the wrong subsystem.
+- **Workaround:** Park the handle in a ref and attach when both the handle and
+  an initialised player exist, whichever arrives second. Release it in
+  `onSurfaceViewDestroyed` via `clearSurfaceHandle`.
+- **Actionable suggestion:** Say in the README that the two are independent and
+  can arrive in either order, and show the rendezvous rather than the direct
+  call. Better still, have `setSurfaceHandle` on an uninitialised player either
+  queue the handle or throw, rather than doing nothing.

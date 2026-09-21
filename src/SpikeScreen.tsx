@@ -25,7 +25,10 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, ScrollView, StyleSheet, Image } from 'react-native';
+import {
+  View, Text, Pressable, ScrollView, StyleSheet, Image, findNodeHandle,
+} from 'react-native';
+import { FocusManager } from '@amazon-devices/react-native-kepler';
 
 import {
   AudioPlayer,
@@ -54,19 +57,64 @@ const CUE_SRC = Image.resolveAssetSource(require('./assets/cue.wav')).uri;
 type ProbeKey = 'clock' | 'usage' | 'ducking' | 'placement';
 
 export default function SpikeScreen(): React.JSX.Element {
-  const [log, setLog] = useState('Initialising players…\n');
+  const [log, setLog] = useState('Initialising players…');
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState<ProbeKey | null>(null);
   const [humanVerdict, setHumanVerdict] = useState<HumanVerdict | null>(null);
   const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  const [status, setStatus] = useState('initialising…');
+  const [lastEvent, setLastEvent] = useState('—');
+  const firstBtn = useRef<View | null>(null);
 
   const video = useRef<VideoPlayer | null>(null);
+  // The surface and the player arrive independently and in either order, so
+  // neither can assume the other exists. Park the handle and attach when both
+  // are present — whichever lands second does the work.
+  const surfaceHandle = useRef<string | null>(null);
+  const surfaceAttached = useRef(false);
   const cueAccessibility = useRef<AudioPlayer | null>(null);
   const cueMedia = useRef<AudioPlayer | null>(null);
 
+  // Newest first. The log pane is short on a 10-foot layout and nothing
+  // auto-scrolls, so appending to the bottom hides every result below the fold.
   const append = useCallback((s: string) => {
-    setLog((prev) => `${prev}\n${s}\n`);
+    setLastEvent(s.split('\n')[0]);
+    setLog((prev) => `${s}\n\n${prev}`);
     console.log(s); // also reaches `vega device shell` — copy/paste beats retyping
+  }, []);
+
+  const attachSurface = useCallback(() => {
+    if (surfaceAttached.current) return;
+    const player = video.current;
+    const handle = surfaceHandle.current;
+    if (!player || handle == null) return;
+    try {
+      player.setSurfaceHandle(handle);
+      surfaceAttached.current = true;
+      append(`surface attached (${handle})`);
+    } catch (err) {
+      append(`setSurfaceHandle THREW: ${String(err)}`);
+    }
+  }, [append]);
+
+  // Vega does not auto-focus anything. Without seeding focus the D-pad has no
+  // target and no press ever reaches a handler — which looks exactly like
+  // "the buttons do nothing".
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const tag = firstBtn.current ? findNodeHandle(firstBtn.current) : null;
+        if (tag != null) {
+          FocusManager.focus(tag);
+          setStatus((st) => (st === 'initialising…' ? 'focus seeded · initialising…' : st));
+        } else {
+          setStatus('focus seed failed: no native tag for the first button');
+        }
+      } catch (err) {
+        setStatus(`focus seed failed: ${String(err)}`);
+      }
+    }, 300);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
@@ -100,9 +148,12 @@ export default function SpikeScreen(): React.JSX.Element {
         cueAccessibility.current = a;
         cueMedia.current = m;
         setReady(true);
+        setStatus('players ready');
+        attachSurface(); // the surface may already be waiting
         append('Players initialised. Video + two cue players (accessibility, media).');
       } catch (err) {
-        append(`INIT THREW: ${String(err)}\n^ friction log entry 2. Copy it verbatim.`);
+        setStatus(`INIT FAILED — ${String(err)}`);
+        append(`INIT THREW: ${String(err)}\n^ friction log material. Copy it verbatim.`);
       }
     })();
 
@@ -112,15 +163,16 @@ export default function SpikeScreen(): React.JSX.Element {
       cueAccessibility.current?.deinitialize?.();
       cueMedia.current?.deinitialize?.();
     };
-  }, [append]);
+  }, [append, attachSurface]);
 
   const run = useCallback(
     async (key: ProbeKey) => {
       const v = video.current as MediaLike | null;
       const cueA = cueAccessibility.current as MediaLike | null;
       const cueM = cueMedia.current as MediaLike | null;
+      append(`▶ ${key} pressed`); // proves focus and press routing work
       if (!v || !cueA || !cueM) {
-        append('Players not ready.');
+        append('…but players are not initialised. See the status line above.');
         return;
       }
 
@@ -194,14 +246,25 @@ export default function SpikeScreen(): React.JSX.Element {
 
       <KeplerVideoSurfaceView
         style={styles.video}
-        onSurfaceViewCreated={(handle: unknown) => {
-          // VideoPlayer renders nothing until it owns a surface.
-          (video.current as unknown as { setSurfaceHandle?: (h: unknown) => void })
-            ?.setSurfaceHandle?.(handle);
+        scalingmode="fit"
+        onSurfaceViewCreated={(handle: string) => {
+          surfaceHandle.current = handle;
+          attachSurface(); // the player may already be waiting
+        }}
+        onSurfaceViewDestroyed={(handle: string) => {
+          try {
+            video.current?.clearSurfaceHandle(handle);
+          } catch {
+            // teardown; nothing useful to do if the player is already gone
+          }
+          surfaceHandle.current = null;
+          surfaceAttached.current = false;
         }}
       />
 
-      <Text style={styles.label}>Probes {ready ? '' : '· initialising'}</Text>
+      <Text style={[styles.status, !ready && styles.statusBad]}>{status}</Text>
+      <Text style={styles.lastEvent} numberOfLines={1}>last: {lastEvent}</Text>
+      <Text style={styles.label}>Probes</Text>
       <View style={styles.row}>
         {(['clock', 'usage', 'ducking', 'placement'] as ProbeKey[]).map((k) => (
           <Pressable
@@ -210,7 +273,8 @@ export default function SpikeScreen(): React.JSX.Element {
             onPress={() => run(k)}
             onFocus={() => setFocusedKey(k)}
             onBlur={() => setFocusedKey(null)}
-            disabled={busy !== null || !ready}
+            ref={k === 'clock' ? firstBtn : undefined}
+            disabled={busy !== null}
             style={[
               styles.btn,
               focusedKey === k && styles.btnFocused,
@@ -250,22 +314,25 @@ export default function SpikeScreen(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#0C1113', padding: 32 },
-  title: { color: '#E6ECEB', fontSize: 28, fontWeight: '700', marginBottom: 16 },
-  video: { height: 200, marginBottom: 16, backgroundColor: '#000' },
+  root: { flex: 1, backgroundColor: '#0C1113', padding: 20 },
+  title: { color: '#E6ECEB', fontSize: 20, fontWeight: '700', marginBottom: 8 },
+  video: { height: 90, marginBottom: 8, backgroundColor: '#000' },
+  status: { color: '#4FBAC1', fontSize: 13, marginBottom: 2 },
+  lastEvent: { color: '#E6ECEB', fontSize: 13, fontFamily: 'monospace' },
+  statusBad: { color: '#D99A3E' },
   label: {
-    color: '#8B9A9B', fontSize: 12, letterSpacing: 1.4,
-    marginTop: 12, marginBottom: 8, textTransform: 'uppercase',
+    color: '#8B9A9B', fontSize: 11, letterSpacing: 1.2,
+    marginTop: 8, marginBottom: 5, textTransform: 'uppercase',
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   btn: {
-    paddingVertical: 10, paddingHorizontal: 16,
+    paddingVertical: 7, paddingHorizontal: 13,
     backgroundColor: '#141A1C', borderWidth: 2, borderColor: '#253032',
   },
   btnFocused: { borderColor: '#4FBAC1', backgroundColor: '#123338' },
   btnSelected: { borderColor: '#4FBAC1' },
   btnDim: { opacity: 0.4 },
   btnText: { color: '#E6ECEB', fontSize: 15 },
-  logBox: { flex: 1, marginTop: 16, backgroundColor: '#080C0D', padding: 14 },
-  logText: { color: '#BFD0CF', fontSize: 13, fontFamily: 'monospace', lineHeight: 19 },
+  logBox: { flex: 1, marginTop: 10, backgroundColor: '#080C0D', padding: 10 },
+  logText: { color: '#BFD0CF', fontSize: 12, fontFamily: 'monospace', lineHeight: 17 },
 });
