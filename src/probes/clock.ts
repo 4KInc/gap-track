@@ -41,6 +41,11 @@ export interface ClockReport {
 
   /** Margin suggestion derived from what was measured, not from a guess. */
   suggestedSafetyMarginMs: number;
+
+  /** Distinct values of currentTime seen. Fewer than 2 means nothing moved. */
+  distinctValues: number;
+  /** False when the clock never advanced — the report is then meaningless. */
+  measured: boolean;
 }
 
 function percentile(sorted: number[], p: number): number {
@@ -113,10 +118,14 @@ export async function probeClock(
 
   const p95 = percentile(sortedIntervals, 95);
 
+  const measured = changes.length >= 2 && steps.length > 0;
+
   return {
     label: opts.label,
     durationMs,
     sampleCount: samples.length,
+    distinctValues: changes.length,
+    measured,
     granularityMs,
     effectiveHz: wallElapsed > 0 ? (changes.length / wallElapsed) * 1000 : 0,
     updateIntervalP50Ms: percentile(sortedIntervals, 50),
@@ -132,6 +141,22 @@ export async function probeClock(
 }
 
 export function formatClockReport(r: ClockReport): string {
+  if (!r.measured) {
+    return [
+      `── PROBE C · ${r.label} ─────────────────────────`,
+      `samples             ${r.sampleCount} over ${(r.durationMs / 1000).toFixed(0)}s`,
+      `distinct values     ${r.distinctValues}`,
+      ``,
+      `VERDICT  NO MEASUREMENT. currentTime never advanced, so every number`,
+      `         below would have been zero by construction rather than by`,
+      `         precision. The clock was not measured; playback did not run.`,
+      ``,
+      `NEXT     Check the media diagnostics line: is duration a real number,`,
+      `         is paused false, is there a media error? A play() that resolves`,
+      `         is not proof that anything is decoding.`,
+    ].join('\n');
+  }
+
   return [
     `── PROBE C · ${r.label} ─────────────────────────`,
     `samples             ${r.sampleCount} over ${(r.durationMs / 1000).toFixed(0)}s`,

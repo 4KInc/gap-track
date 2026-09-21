@@ -97,6 +97,10 @@ opt-in. The vocabulary is fixed; custom intents are not registrable.
 - `HTMLAudioElement` exists as a class distinct from the video element, with its own standard `volume`
 - The Vega Virtual Device needs no hardware; a physical stick is still required for real performance testing
 - Vega Media Controls ships as `@amazon-devices/kepler-media-controls`
+- **Playback requires MSE.** A progressive `src` — including a packaged
+  `file://` asset — is rejected with `MEDIA_ERR_SRC_NOT_SUPPORTED` at 0ms.
+  Media must be fed through `MediaSource` + `appendBuffer`; the official sample
+  ports Shaka Player to do it. Verified on device, not inferred.
 
 Unverified and load-bearing: concurrent audio playback, per-element gain,
 playhead clock resolution. The media player FAQ is a stub and answers none of

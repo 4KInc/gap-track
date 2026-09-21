@@ -127,3 +127,41 @@ given task, there is no entry. An empty section is an honest section.
   can arrive in either order, and show the rendezvous rather than the direct
   call. Better still, have `setSurfaceHandle` on an uninitialised player either
   queue the handle or throw, rather than doing nothing.
+
+### 5. A packaged local file cannot be played with `src`; MSE is mandatory, and nothing says so
+
+- **Task attempted:** Play a short bundled `.mp4` and `.wav` from app assets, to
+  measure playhead behaviour and concurrent audio.
+- **Steps taken:** Resolved the packaged URIs with
+  `Image.resolveAssetSource(require('./assets/clip.mp4'))`, which returned
+  `file:///pkg/bundle/assets/src/assets/clip.mp4`. Confirmed both files are in
+  the build output at that exact relative path and at full size (4,999,379 and
+  99,176 bytes). Assigned `player.src = uri`, called `player.load()`, then
+  polled `readyState`.
+- **Expected result:** `readyState` reaching `HAVE_METADATA`, a real `duration`,
+  and a `currentTime` that advances on `play()`.
+- **Actual result:** The element errors **immediately**, at 0ms, before any
+  fetch or decode could have occurred:
+  `error: code=4 (SRC_NOT_SUPPORTED) msg=""`, with `duration=NaN` and
+  `readyState=0 (HAVE_NOTHING)`. The message string is empty, so the error
+  carries no indication of *what* about the source was unsupported — scheme,
+  container, or codec.
+
+  The failure is silent in the worst way: `play()` still resolves and `paused`
+  still flips to `false`, so an app looks like it is playing. The only symptoms
+  are a black surface and a `currentTime` frozen at 0 — which read as a decode
+  or rendering problem and send you looking in the wrong subsystem.
+- **Severity:** High. It blocks the most obvious first thing any developer
+  tries — play a bundled asset — and the diagnostics actively mislead.
+- **Workaround:** Feed the player through Media Source Extensions instead. The
+  official [vega-video-sample](https://github.com/AmazonAppDev/vega-video-sample)
+  ports Shaka Player for exactly this, and every example in the
+  `react-native-w3cmedia` README uses `MediaSource` + `addSourceBuffer` +
+  `appendBuffer` for both video and audio. That is a strong implicit signal,
+  but it is never stated as a requirement.
+- **Actionable suggestion:** Say plainly in the W3C Media API overview that
+  progressive `src` assignment is not supported and MSE is required, ideally in
+  the first paragraph. Populate `MediaError.message` with the reason — "scheme
+  not supported", "use MediaSource" — so the failure is self-describing. Better
+  still, have `src` assignment of an unsupported scheme throw synchronously
+  rather than resolving `play()` and leaving the app apparently playing.

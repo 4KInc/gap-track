@@ -83,6 +83,48 @@ export default function SpikeScreen(): React.JSX.Element {
     console.log(s); // also reaches `vega device shell` — copy/paste beats retyping
   }, []);
 
+  // A play() that resolves is not proof anything is decoding. Dump what the
+  // player actually believes, so a dead clock can be told apart from a dead
+  // decoder or a source that never loaded.
+  const dumpMedia = useCallback((tag: string, m: unknown) => {
+    const p = m as Partial<{
+      src: string; currentTime: number; duration: number;
+      paused: boolean; volume: number; readyState: number;
+      error: { code?: number; message?: string } | null;
+    }>;
+    const CODES: Record<number, string> = {
+      1: 'ABORTED', 2: 'NETWORK', 3: 'DECODE', 4: 'SRC_NOT_SUPPORTED',
+    };
+    const e = p?.error;
+    const err = e
+      ? `code=${e.code} (${CODES[e.code ?? -1] ?? '?'}) msg="${e.message ?? ''}"`
+      : 'none';
+    const READY: Record<number, string> = {
+      0: 'HAVE_NOTHING', 1: 'HAVE_METADATA', 2: 'HAVE_CURRENT_DATA',
+      3: 'HAVE_FUTURE_DATA', 4: 'HAVE_ENOUGH_DATA',
+    };
+    append(
+      `${tag}: ${String(p?.src).split('/').pop()}\n`
+      + `  currentTime=${p?.currentTime} duration=${p?.duration} paused=${p?.paused}\n`
+      + `  readyState=${p?.readyState} (${READY[p?.readyState ?? -1] ?? '?'})\n`
+      + `  error: ${err}`,
+    );
+  }, [append]);
+
+  // readyState >= 1 (HAVE_METADATA) is the first point at which duration is
+  // real and the clock can be expected to move.
+  const awaitMetadata = useCallback(async (m: unknown, tag: string, timeoutMs = 6000) => {
+    const p = m as { readyState: number; error: { code?: number } | null };
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeoutMs) {
+      if (p.error) { append(`${tag}: errored while loading after ${Date.now() - t0}ms`); return false; }
+      if (p.readyState >= 1) { append(`${tag}: metadata in ${Date.now() - t0}ms`); return true; }
+      await new Promise<void>((r) => { setTimeout(() => r(), 50); });
+    }
+    append(`${tag}: TIMEOUT — still readyState=${p.readyState} after ${timeoutMs}ms`);
+    return false;
+  }, [append]);
+
   const attachSurface = useCallback(() => {
     if (surfaceAttached.current) return;
     const player = video.current;
@@ -125,6 +167,7 @@ export default function SpikeScreen(): React.JSX.Element {
         const v = new VideoPlayer();
         await v.initialize();
         v.src = CLIP_SRC;
+        v.load(); // setting src alone does not begin the resource selection
 
         // The cue element under test, declared as an accessibility prompt.
         const a = new AudioPlayer(
@@ -133,6 +176,7 @@ export default function SpikeScreen(): React.JSX.Element {
         );
         await a.initialize();
         a.src = CUE_SRC;
+        a.load();
 
         // Control: same audio, declared as ordinary media. If this one is
         // refused and the accessibility one is not, the attribute is the answer.
@@ -142,6 +186,7 @@ export default function SpikeScreen(): React.JSX.Element {
         );
         await m.initialize();
         m.src = CUE_SRC;
+        m.load();
 
         if (cancelled) return;
         video.current = v;
@@ -151,6 +196,8 @@ export default function SpikeScreen(): React.JSX.Element {
         setStatus('players ready');
         attachSurface(); // the surface may already be waiting
         append('Players initialised. Video + two cue players (accessibility, media).');
+        append(`clip uri: ${CLIP_SRC}`);
+        append(`cue  uri: ${CUE_SRC}`);
       } catch (err) {
         setStatus(`INIT FAILED — ${String(err)}`);
         append(`INIT THREW: ${String(err)}\n^ friction log material. Copy it verbatim.`);
@@ -179,9 +226,15 @@ export default function SpikeScreen(): React.JSX.Element {
       setBusy(key);
       try {
         if (key === 'clock') {
+          dumpMedia('before load wait', v);
+          await awaitMetadata(v, 'video');
+          dumpMedia('after metadata wait', v);
           await v.play();
+          await new Promise<void>((resolve) => { setTimeout(() => resolve(), 700); });
+          dumpMedia('700ms after play()', v);
           append('Probe C — 9s (clip is 10s). Do not touch the remote.');
           const r = await probeClock(v, { label: 'LABEL THIS: VVD or stick', durationMs: 9_000 });
+          dumpMedia('after probe', v);
           v.pause();
           append(formatClockReport(r));
         }
@@ -235,7 +288,7 @@ export default function SpikeScreen(): React.JSX.Element {
         setBusy(null);
       }
     },
-    [append, humanVerdict],
+    [append, awaitMetadata, dumpMedia, humanVerdict],
   );
 
   const verdicts: HumanVerdict[] = ['heard-both', 'heard-video-only', 'heard-cue-only', 'heard-neither'];
