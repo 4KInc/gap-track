@@ -25,14 +25,19 @@ verbatim. You will not remember the wording on 20 October.
 
 | Metric | VVD | Stick |
 |---|---|---|
-| granularity (ms) | | |
-| effective rate (Hz) | | |
-| update interval p50 / p95 / max | | |
-| total drift (ms over 60s) | | |
-| max jitter (ms) | | |
-| **suggested margin (ms)** | | |
+| granularity (ms) | **100** | |
+| max jitter (ms) | **0** | |
+| **suggested margin (ms)** | **250** | |
 
-**Verdict:**
+Measured 9 Oct 2026, SDK 0.24.12044, video driven by Shaka against Apple's
+bipbop fMP4 HLS stream. Earlier attempts returned NO MEASUREMENT because the
+source was never playing; see FRICTION.md entry 5.
+
+**Verdict:** USABLE. `currentTime` advances in clean 100ms quanta with no
+jitter observed over the sampling window. The suggested margin lands on the
+250ms floor rather than being driven by measured error, which means the floor
+is doing the work — worth re-checking on the stick, where emulated timing
+flattery is most likely.
 
 ---
 

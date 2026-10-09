@@ -59,7 +59,13 @@ const HTTPS_SRC =
   'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_5MB.mp4';
 const HLS_SRC =
   'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8';
-const CUE_SRC = Image.resolveAssetSource(require('./assets/cue.wav')).uri;
+// The cue only has to be A SECOND AUDIO SOURCE. It does not have to be speech,
+// or ours, or local. Probe A asks whether two streams can sound at once and
+// whether USAGE_ACCESSIBILITY changes that — any playable stream answers it.
+// So: a second HLS stream, which we know plays, instead of ffmpeg and a local
+// server we do not have time for.
+const CUE_HLS =
+  'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8';
 
 type ProbeKey = 'clock' | 'sources' | 'usage' | 'ducking' | 'placement';
 
@@ -75,6 +81,8 @@ export default function SpikeScreen(): React.JSX.Element {
 
   const video = useRef<VideoPlayer | null>(null);
   const shaka = useRef<ShakaPlayer | null>(null);
+  const shakaCueA11y = useRef<ShakaPlayer | null>(null);
+  const shakaCueMedia = useRef<ShakaPlayer | null>(null);
   // The surface and the player arrive independently and in either order, so
   // neither can assume the other exists. Park the handle and attach when both
   // are present — whichever lands second does the work.
@@ -125,7 +133,17 @@ export default function SpikeScreen(): React.JSX.Element {
     const p = m as { readyState: number; error: { code?: number } | null };
     const t0 = Date.now();
     while (Date.now() - t0 < timeoutMs) {
-      if (p.error) { append(`${tag}: errored while loading after ${Date.now() - t0}ms`); return false; }
+      if (p.error) {
+        const c = (p.error as { code?: number; message?: string }).code;
+        const CODES: Record<number, string> = {
+          1: 'ABORTED', 2: 'NETWORK', 3: 'DECODE', 4: 'SRC_NOT_SUPPORTED',
+        };
+        append(
+          `${tag}: errored after ${Date.now() - t0}ms — code=${c} (${CODES[c ?? -1] ?? '?'})`
+          + ` msg="${(p.error as { message?: string }).message ?? ''}"`,
+        );
+        return false;
+      }
       if (p.readyState >= 1) { append(`${tag}: metadata in ${Date.now() - t0}ms`); return true; }
       await new Promise<void>((r) => { setTimeout(() => r(), 50); });
     }
@@ -186,8 +204,9 @@ export default function SpikeScreen(): React.JSX.Element {
           AudioUsageType.USAGE_ACCESSIBILITY,
         );
         await a.initialize();
-        a.src = CUE_SRC;
-        a.load();
+        const spA = new ShakaPlayer(a as never, { secure: false, abrEnabled: false });
+        spA.load({ uri: CUE_HLS }, false);
+        shakaCueA11y.current = spA;
 
         // Control: same audio, declared as ordinary media. If this one is
         // refused and the accessibility one is not, the attribute is the answer.
@@ -196,13 +215,16 @@ export default function SpikeScreen(): React.JSX.Element {
           AudioUsageType.USAGE_MEDIA,
         );
         await m.initialize();
-        m.src = CUE_SRC;
-        m.load();
+        const spM = new ShakaPlayer(m as never, { secure: false, abrEnabled: false });
+        spM.load({ uri: CUE_HLS }, false);
+        shakaCueMedia.current = spM;
 
         if (cancelled) return;
         video.current = v;
         cueAccessibility.current = a;
         cueMedia.current = m;
+        await awaitMetadata(a, 'cue (accessibility)', 20000);
+        await awaitMetadata(m, 'cue (media)', 20000);
         setReady(true);
         setStatus('players ready');
         attachSurface(); // the surface may already be waiting
@@ -220,7 +242,7 @@ export default function SpikeScreen(): React.JSX.Element {
       cueAccessibility.current?.deinitialize?.();
       cueMedia.current?.deinitialize?.();
     };
-  }, [append, attachSurface]);
+  }, [append, attachSurface, awaitMetadata]);
 
   const run = useCallback(
     async (key: ProbeKey) => {
@@ -247,6 +269,13 @@ export default function SpikeScreen(): React.JSX.Element {
           dumpMedia('after probe', v);
           v.pause();
           append(formatClockReport(r));
+          // appended last, so it sits at the very top of a newest-first log
+          append(
+            r.measured
+              ? `RESULT  margin ${r.suggestedSafetyMarginMs}ms  ·  granularity `
+                + `${r.granularityMs.toFixed(0)}ms  ·  jitter ${r.maxJitterMs.toFixed(0)}ms`
+              : `RESULT  NO MEASUREMENT — currentTime gave ${r.distinctValues} distinct value(s)`,
+          );
         }
 
         if (key === 'sources') {
@@ -284,6 +313,23 @@ export default function SpikeScreen(): React.JSX.Element {
 
         if (key === 'usage') {
           append('Probe A — the one that matters. LISTEN to both runs.');
+
+          // Cue loads have proved flaky across runs, so re-arm them here rather
+          // than trusting a load from whenever the app started.
+          for (const [el, sp, tag] of [
+            [cueA, shakaCueA11y.current, 'cue (accessibility)'],
+            [cueM, shakaCueMedia.current, 'cue (media)'],
+          ] as [MediaLike, ShakaPlayer | null, string][]) {
+            if (el.error || (el.readyState ?? 0) < 1) {
+              append(`${tag}: re-arming`);
+              try {
+                sp?.load({ uri: CUE_HLS }, false);
+                await awaitMetadata(el, `${tag} retry`, 15000);
+              } catch (e) {
+                append(`${tag}: reload threw ${String(e)}`);
+              }
+            }
+          }
 
           append('\n[1/2] cue declared USAGE_MEDIA (control)');
           const asMedia = await probeConcurrentAudio(v, cueM, { label: 'USAGE_MEDIA' });

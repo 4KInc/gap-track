@@ -30,6 +30,8 @@ export interface MediaLike {
   paused: boolean;
   volume: number;
   src?: string;
+  readyState?: number;
+  error?: { code?: number; message?: string } | null;
   play(): Promise<void> | void;
   pause(): void;
 }
