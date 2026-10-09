@@ -64,8 +64,12 @@ const HLS_SRC =
 // whether USAGE_ACCESSIBILITY changes that — any playable stream answers it.
 // So: a second HLS stream, which we know plays, instead of ffmpeg and a local
 // server we do not have time for.
+// AUDIO-ONLY. Pointing an AudioPlayer at a video variant fails in GStreamer
+// caps negotiation: code=3 DECODE, "streaming stopped, reason not-negotiated
+// (-4)" from GstAppSrc. This is the audio rendition of the same asset the
+// video uses: stereo AAC in byte-range fMP4, which is what MSE wants.
 const CUE_HLS =
-  'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8';
+  'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/a1/prog_index.m3u8';
 
 type ProbeKey = 'clock' | 'sources' | 'usage' | 'ducking' | 'placement';
 
@@ -331,11 +335,11 @@ export default function SpikeScreen(): React.JSX.Element {
             }
           }
 
-          append('\n[1/2] cue declared USAGE_MEDIA (control)');
+          append('\n>>> [1/2] LISTEN NOW — cue declared USAGE_MEDIA (control)');
           const asMedia = await probeConcurrentAudio(v, cueM, { label: 'USAGE_MEDIA' });
           append(`  video ${asMedia.videoAdvancedMs.toFixed(0)}ms · cue ${asMedia.cueAdvancedMs.toFixed(0)}ms · ${asMedia.machinePass ? 'PASS' : 'FAIL'}`);
 
-          append('\n[2/2] cue declared USAGE_ACCESSIBILITY');
+          append('\n>>> [2/2] LISTEN NOW — cue declared USAGE_ACCESSIBILITY');
           const asA11y = await probeConcurrentAudio(v, cueA, { label: 'USAGE_ACCESSIBILITY' });
           asA11y.humanVerdict = humanVerdict;
           append(`  video ${asA11y.videoAdvancedMs.toFixed(0)}ms · cue ${asA11y.cueAdvancedMs.toFixed(0)}ms · ${asA11y.machinePass ? 'PASS' : 'FAIL'}`);
@@ -379,6 +383,19 @@ export default function SpikeScreen(): React.JSX.Element {
     },
     [append, awaitMetadata, dumpMedia, humanVerdict],
   );
+
+  // Input has been unreliable on the VVD and this is the one measurement the
+  // build is waiting on, so do not make it depend on landing a button press.
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (!ready || autoRan.current) return;
+    autoRan.current = true;
+    const t = setTimeout(() => {
+      append('AUTO-RUNNING the usage probe in 3s. Turn the volume up and listen.');
+      setTimeout(() => { void run('usage'); }, 3000);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [ready, run, append]);
 
   const verdicts: HumanVerdict[] = ['heard-both', 'heard-video-only', 'heard-cue-only', 'heard-neither'];
 

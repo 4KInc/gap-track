@@ -283,3 +283,43 @@ given task, there is no entry. An empty section is an honest section.
   the macOS stub defeats) before applying any patches. Combined with entries 7,
   this is three separate environment prerequisites discovered one failed build
   at a time, each after the slowest part of the script.
+
+### 9. The Vega Virtual Device has no audio device, and nothing says so
+
+- **Task attempted:** Determine whether a second audio stream can play
+  concurrently with video, and whether declaring
+  `AudioUsageType.USAGE_ACCESSIBILITY` changes that. This is the core question
+  for an audio-description app.
+- **Steps taken:** Built a probe that plays video through Shaka while an
+  `AudioPlayer` plays an audio-only HLS rendition over it, twice — once
+  declared `USAGE_MEDIA`, once `USAGE_ACCESSIBILITY`. Both players reported
+  metadata loaded (`482ms` and `0ms`) and no errors. Listened on a Mac with
+  output confirmed working.
+- **Expected result:** To hear one stream, or two, and learn which.
+- **Actual result:** Silence. Inspecting the running virtual-device process
+  shows **no audio device is configured at all**. The complete flag list is:
+
+  ```
+  -avd-arch -skindir -skin -ports -dns-server
+  -sysdir -datadir -data -keyboard-mapping -qemu -qmp
+  ```
+
+  No `-audio`, `-soundhw`, `virtio-snd`, HDA or AC97. The media pipeline
+  initialises, loads and reports healthy because GStreamer renders to a sink
+  that goes nowhere, so nothing in the API surface indicates that audio is
+  impossible. An app can play, report `paused === false`, advance
+  `currentTime`, and produce no sound, with no error at any layer.
+- **Severity:** High for any audio-centric app. The virtual device is
+  presented as the way to develop without hardware, and the Fire TV track
+  explicitly lists accessibility among its priorities, but **no audio feature
+  can be validated on it at all**. Worse, the failure is indistinguishable
+  from a working app until you put on headphones, so the time is spent before
+  you learn the test was never possible.
+- **Workaround:** None on the emulator. Audio behaviour can only be tested on
+  a physical Fire TV device.
+- **Actionable suggestion:** Either configure an audio device on the VVD and
+  route it to the host, or state plainly in the virtual-device documentation
+  that audio output is not emulated. A line in the VVD limitations section
+  would have saved this entirely. Surfacing it at runtime would be better
+  still: a warning on the first `AudioPlayer` construction, or a documented
+  capability query so an app can detect it rather than infer it from silence.

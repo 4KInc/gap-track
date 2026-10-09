@@ -50,7 +50,11 @@ flattery is most likely.
 | machine pass | | |
 | **what you actually heard** | | |
 
-**Verdict:** Adaptive Description viable / Pause-and-Describe becomes primary
+**Verdict:** UNANSWERABLE ON THE EMULATOR. The VVD has no audio device
+configured (see FRICTION.md entry 9), so audibility cannot be tested here at
+all. Machine-side evidence — whether both players' clocks advance while
+overlapping — still indicates whether the platform *permits* two concurrent
+audio pipelines, which is most of the question. Audibility needs the stick.
 
 If it failed, write down exactly how it failed — silent but progressing, threw,
 stalled the video, distorted. Each one implies a different fix and a different
