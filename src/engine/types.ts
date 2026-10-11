@@ -40,7 +40,12 @@ export type DropReason =
   /** The viewer seeked, paused, or changed rate; the queue is stale. */
   | 'INVALIDATED'
   /** No audio was produced for this cue. */
-  | 'NO_AUDIO';
+  | 'NO_AUDIO'
+  /**
+   * Still sounding when this one was due. Admission cannot catch this: it
+   * judges cues one at a time, and overlap is a property of the pair.
+   */
+  | 'OVERLAPS_PREVIOUS';
 
 export type Decision =
   | {

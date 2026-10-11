@@ -78,6 +78,28 @@ export function wavInfo(buf: Buffer): WavInfo {
   };
 }
 
+/**
+ * The PCM payload, located by walking the chunk list.
+ *
+ * Needed by the assembler, which splices cue audio into one track. Slicing
+ * from a fixed offset would copy an encoder's padding chunks in as samples,
+ * which is audible as a click and shifts everything after it.
+ */
+export function wavData(buf: Buffer): { info: WavInfo; data: Buffer } {
+  const info = wavInfo(buf);
+  let off = 12;
+  while (off + 8 <= buf.length) {
+    const id = ascii(buf, off);
+    const size = buf.readUInt32LE(off + 4);
+    const body = off + 8;
+    if (id === 'data') {
+      return { info, data: buf.subarray(body, body + info.dataBytes) };
+    }
+    off = body + size + (size % 2);
+  }
+  throw new Error('WAV has no data chunk');
+}
+
 /** Build a minimal WAV, used by the tests and handy for silence padding. */
 export function makeWav(opts: {
   durationMs: number;
