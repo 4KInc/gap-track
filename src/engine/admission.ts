@@ -34,26 +34,31 @@ export function decide(
   }
 
   const required = cue.audioDurationMs + config.safetyMarginMs;
-  const available = cue.gap.durationMs;
 
-  // Timing fit comes first: a cue that could never fit is dropped for the
-  // honest reason even if it is also late.
-  if (required > available) {
+  // Could it ever have fitted, starting from the top of its gap? A cue that
+  // fails here is dropped for the honest reason even if it is also late.
+  if (required > cue.gap.durationMs) {
     return {
       verdict: 'DROP',
       cue,
       reason: 'WOULD_OVERRUN',
-      overrunMs: required - available,
+      overrunMs: required - cue.gap.durationMs,
     };
   }
 
-  // Can it still start cleanly from where the viewer actually is?
-  const startsInMs = cue.gap.startMs - playheadMs;
-  if (startsInMs < -config.safetyMarginMs) {
+  // Can it still finish inside the gap from where the viewer actually is?
+  // The question is completion, not punctuality: arriving 300ms into a
+  // five-second silence is perfectly fine, and the earlier version of this
+  // check wrongly discarded exactly that case.
+  const gapEndMs = cue.gap.startMs + cue.gap.durationMs;
+  const effectiveStartMs = Math.max(playheadMs, cue.gap.startMs);
+  const remainingMs = gapEndMs - effectiveStartMs;
+
+  if (required > remainingMs) {
     return { verdict: 'DROP', cue, reason: 'TOO_LATE', overrunMs: 0 };
   }
 
-  return { verdict: 'PLAY', cue, headroomMs: available - required };
+  return { verdict: 'PLAY', cue, headroomMs: remainingMs - required };
 }
 
 /**

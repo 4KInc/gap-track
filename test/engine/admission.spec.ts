@@ -75,6 +75,18 @@ describe('admission: lateness', () => {
     expect(decide(cue(), 10_200, config).verdict).toBe('PLAY');
   });
 
+  it('starts a cue late in a long gap, because completion is what matters', () => {
+    // 300ms into a 5s silence, needing 1.25s. Punctuality is irrelevant;
+    // finishing inside the gap is the only question.
+    const d = decide(
+      cue({ audioDurationMs: 1_000, gap: gap(10_100, 5_000) }),
+      10_400,
+      config,
+    );
+    expect(d.verdict).toBe('PLAY');
+    if (d.verdict === 'PLAY') expect(d.headroomMs).toBe(3_450);
+  });
+
   it('drops a cue whose moment has passed', () => {
     const d = decide(cue(), 14_000, config);
     expect(d.verdict).toBe('DROP');
