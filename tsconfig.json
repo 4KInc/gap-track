@@ -1,6 +1,9 @@
 {
     "extends": "@react-native/typescript-config",
     "compilerOptions": {
-        "types": ["jest", "@amazon-devices/react-native-kepler"], // Override "jest", "react-native" from @react-native/typescript-config
+        // "node" is needed by pipeline/, the build-time tooling. It never enters
+        // the device bundle: Metro follows the import graph from index.js, and
+        // nothing under src/ imports it.
+        "types": ["jest", "node", "@amazon-devices/react-native-kepler"],
     },
 }
