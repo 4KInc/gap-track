@@ -13,9 +13,12 @@
  * on a new film before paying for a few hundred vision calls.
  */
 
+import { join } from 'node:path';
+
 import { ClaudeDescriber, claudeConfigured } from './describe/claude';
 import { SayVoice } from './synthesis/say';
 import { buildTrack } from './build';
+import { mixDescribed } from './mix';
 import type { DescribeRequest, DescribeResult, Describer } from './describe/types';
 
 interface Args {
@@ -27,10 +30,11 @@ interface Args {
   minGap?: number;
   margin?: number;
   voice?: string;
+  mix: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { out: 'build/tracks', dry: false };
+  const args: Args = { out: 'build/tracks', dry: false, mix: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => argv[++i];
@@ -42,6 +46,7 @@ function parseArgs(argv: string[]): Args {
     else if (a === '--margin') args.margin = Number(next());
     else if (a === '--voice') args.voice = next();
     else if (a === '--dry') args.dry = true;
+    else if (a === '--mix') args.mix = true;
     else if (a === '--help' || a === '-h') {
       usage();
       process.exit(0);
@@ -65,6 +70,11 @@ Build a description track for a film.
   --margin <ms>       safety margin                (default 250, measured)
   --voice <name>      macOS say voice              (default Samantha)
   --dry               skip the API, placeholder text
+  --mix               also render <title>-described.mp4
+
+The Vega simulator has no audio hardware, so --mix produces the file that
+can actually be heard: the programme with its audio ducked under the
+descriptions, at the offsets the scheduler admitted.
 
 Needs ANTHROPIC_API_KEY unless --dry.
 `);
@@ -116,12 +126,25 @@ async function main(): Promise<void> {
     log: (line) => process.stdout.write(`${line}\n`),
   });
 
+  let mixed: string | null = null;
+  if (args.mix) {
+    const out = join(args.out, args.title as string, `${args.title}-described.mp4`);
+    process.stdout.write('mixing described film…\n');
+    mixed = (await mixDescribed(
+      args.video as string,
+      result.track.audioPath,
+      result.track.cues,
+      out,
+    )).outputPath;
+  }
+
   const seconds = ((Date.now() - started) / 1000).toFixed(0);
   process.stdout.write(
     `\ndone in ${seconds}s\n`
     + `  ${result.describedCount} descriptions across ${result.gapCount} gaps\n`
     + `  ${result.declinedCount} declined, ${result.track.rejected.length} refused by admission\n`
-    + `  ${result.packaged.playlistPath}\n`,
+    + `  ${result.packaged.playlistPath}\n`
+    + (mixed ? `  ${mixed}\n` : ''),
   );
 }
 

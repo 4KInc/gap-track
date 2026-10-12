@@ -315,8 +315,13 @@ given task, there is no entry. An empty section is an honest section.
   can be validated on it at all**. Worse, the failure is indistinguishable
   from a working app until you put on headphones, so the time is spent before
   you learn the test was never possible.
-- **Workaround:** None on the emulator. Audio behaviour can only be tested on
-  a physical Fire TV device.
+- **Workaround:** None on the emulator for *hearing* anything. The project
+  works around it by keeping the scheduler free of any platform dependency,
+  so the identical engine can be run against a desktop audio stack, and by
+  rendering a mixed file of the programme with its descriptions at the
+  offsets the scheduler admitted. Both are honest demonstrations of a
+  feature the simulator cannot play, but neither tells you anything about
+  Vega's audio policy — which remains untested.
 - **Actionable suggestion:** Either configure an audio device on the VVD and
   route it to the host, or state plainly in the virtual-device documentation
   that audio output is not emulated. A line in the VVD limitations section
