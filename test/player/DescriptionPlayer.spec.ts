@@ -279,3 +279,45 @@ describe('DescriptionPlayer: turning it off mid-cue', () => {
     expect(video.paused).toBe(false);
   });
 });
+
+describe('DescriptionPlayer: reporting to the overlay', () => {
+  it('buffers decisions rather than pushing one render per tick', () => {
+    const p = make();
+    p.load(manifest([cue('a', 10_000, 5_000, 1_000), cue('big', 20_000, 500, 3_000)]));
+    p.setMode('adaptive');
+
+    video.currentTime = 10;
+    p.tick();
+
+    const drained = p.currentDecisions();
+    expect(drained.length).toBeGreaterThan(0);
+    expect(drained[0].decision.cue.id).toBeDefined();
+  });
+
+  it('drains, so a decision is never reported twice', () => {
+    // Re-reporting would make the overlay's history claim cues were judged
+    // more often than they were.
+    const p = make();
+    p.load(manifest([cue('a', 10_000, 5_000, 1_000)]));
+    p.setMode('adaptive');
+    video.currentTime = 10;
+    p.tick();
+
+    expect(p.currentDecisions()).toHaveLength(1);
+    expect(p.currentDecisions()).toHaveLength(0);
+  });
+
+  it('reports what is sounding, and nothing once it has finished', () => {
+    const p = make();
+    p.load(manifest([cue('a', 10_000, 5_000, 1_000)]));
+    p.setMode('adaptive');
+
+    video.currentTime = 10;
+    p.tick();
+    expect(p.speakingText()).toBe('cue a');
+
+    video.currentTime = 11.5;
+    p.tick();
+    expect(p.speakingText()).toBeNull();
+  });
+});

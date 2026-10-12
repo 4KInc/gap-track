@@ -54,6 +54,15 @@ export class DescriptionPlayer {
   private speaking: { cue: Cue; endsAtMs: number } | null = null;
   /** True while the programme is held for pause-and-describe. */
   private holding = false;
+  /**
+   * Decisions since the caller last asked.
+   *
+   * The sink carries a formatted line for logs; the overlay needs the
+   * structured decision so it can lay out the operands itself. Buffered
+   * rather than pushed, so a UI that renders at its own pace cannot drop
+   * one or force a render per tick.
+   */
+  private pending: SchedulerEvent[] = [];
 
   constructor(
     private readonly video: MediaPort,
@@ -206,7 +215,27 @@ export class DescriptionPlayer {
     }
   }
 
+  /**
+   * Decisions since the last call, newest first. Draining rather than
+   * peeking: each decision is a one-time event, and re-reporting it would
+   * make the overlay's history lie about how often cues were judged.
+   */
+  currentDecisions(): SchedulerEvent[] {
+    if (this.pending.length === 0) return [];
+    const out = this.pending.reverse();
+    this.pending = [];
+    return out;
+  }
+
+  /** What is sounding right now, for display. */
+  speakingText(): string | null {
+    return this.speaking?.cue.text ?? null;
+  }
+
   private report(events: SchedulerEvent[]): void {
-    for (const ev of events) this.sink(explain(ev.decision, this.config));
+    for (const ev of events) {
+      this.pending.push(ev);
+      this.sink(explain(ev.decision, this.config));
+    }
   }
 }
