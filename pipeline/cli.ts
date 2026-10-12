@@ -1,0 +1,131 @@
+#!/usr/bin/env node
+/**
+ * Build a description track for a film.
+ *
+ *   npx tsx pipeline/cli.ts \
+ *     --video assets/sintel.mp4 \
+ *     --captions assets/sintel.vtt \
+ *     --title sintel \
+ *     --out build/tracks
+ *
+ * Needs ANTHROPIC_API_KEY in the environment. `--dry` skips the API and
+ * writes placeholder text, which is how you check gap detection and timing
+ * on a new film before paying for a few hundred vision calls.
+ */
+
+import { ClaudeDescriber, claudeConfigured } from './describe/claude';
+import { SayVoice } from './synthesis/say';
+import { buildTrack } from './build';
+import type { DescribeRequest, DescribeResult, Describer } from './describe/types';
+
+interface Args {
+  video?: string;
+  captions?: string;
+  title?: string;
+  out: string;
+  dry: boolean;
+  minGap?: number;
+  margin?: number;
+  voice?: string;
+}
+
+function parseArgs(argv: string[]): Args {
+  const args: Args = { out: 'build/tracks', dry: false };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    const next = () => argv[++i];
+    if (a === '--video') args.video = next();
+    else if (a === '--captions') args.captions = next();
+    else if (a === '--title') args.title = next();
+    else if (a === '--out') args.out = next();
+    else if (a === '--min-gap') args.minGap = Number(next());
+    else if (a === '--margin') args.margin = Number(next());
+    else if (a === '--voice') args.voice = next();
+    else if (a === '--dry') args.dry = true;
+    else if (a === '--help' || a === '-h') {
+      usage();
+      process.exit(0);
+    } else {
+      throw new Error(`unknown argument: ${a}`);
+    }
+  }
+  return args;
+}
+
+function usage(): void {
+  process.stdout.write(`
+Build a description track for a film.
+
+  --video <path>      programme to describe        (required)
+  --captions <path>   WebVTT or SRT                (required)
+  --title <id>        output folder name           (required)
+  --out <dir>         where tracks go              (default build/tracks)
+
+  --min-gap <ms>      shortest silence worth using (default 1200)
+  --margin <ms>       safety margin                (default 250, measured)
+  --voice <name>      macOS say voice              (default Samantha)
+  --dry               skip the API, placeholder text
+
+Needs ANTHROPIC_API_KEY unless --dry.
+`);
+}
+
+/**
+ * Stand-in writer for --dry.
+ *
+ * Deliberately writes to the exact word budget: the point of a dry run is to
+ * see which gaps survive admission and where cues land, and a shorter
+ * placeholder would make the track look more spacious than it is.
+ */
+class PlaceholderDescriber implements Describer {
+  readonly name = 'placeholder';
+  async describe(req: DescribeRequest): Promise<DescribeResult> {
+    const words = Array.from({ length: req.wordBudget }, (_, i) => (i === 0 ? 'Placeholder' : 'word'));
+    return { text: `${words.join(' ')}.`, engine: this.name, model: 'none', declined: false };
+  }
+}
+
+async function main(): Promise<void> {
+  const args = parseArgs(process.argv.slice(2));
+
+  const missing = (['video', 'captions', 'title'] as const).filter((k) => !args[k]);
+  if (missing.length) {
+    process.stderr.write(`missing required argument(s): ${missing.map((m) => `--${m}`).join(', ')}\n`);
+    usage();
+    process.exit(2);
+  }
+
+  if (!args.dry && !claudeConfigured()) {
+    process.stderr.write(
+      'ANTHROPIC_API_KEY is not set.\n'
+      + 'Either export it, or pass --dry to check gaps and timing without the API.\n',
+    );
+    process.exit(2);
+  }
+
+  const started = Date.now();
+  const result = await buildTrack({
+    titleId: args.title as string,
+    videoPath: args.video as string,
+    captionsPath: args.captions as string,
+    outDir: args.out,
+    describer: args.dry ? new PlaceholderDescriber() : new ClaudeDescriber(),
+    synth: new SayVoice({ voice: args.voice }),
+    config: args.margin ? { safetyMarginMs: args.margin } : undefined,
+    minGapMs: args.minGap,
+    log: (line) => process.stdout.write(`${line}\n`),
+  });
+
+  const seconds = ((Date.now() - started) / 1000).toFixed(0);
+  process.stdout.write(
+    `\ndone in ${seconds}s\n`
+    + `  ${result.describedCount} descriptions across ${result.gapCount} gaps\n`
+    + `  ${result.declinedCount} declined, ${result.track.rejected.length} refused by admission\n`
+    + `  ${result.packaged.playlistPath}\n`,
+  );
+}
+
+main().catch((err) => {
+  process.stderr.write(`\nfailed: ${err?.message ?? String(err)}\n`);
+  process.exit(1);
+});
