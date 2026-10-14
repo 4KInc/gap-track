@@ -380,3 +380,59 @@ given task, there is no entry. An empty section is an honest section.
   would end this in seconds rather than an evening. Best of all, emulate
   decode — a simulator for a television that cannot show a picture is a
   simulator for the one part of a TV app nobody doubts.
+
+### 11. `launch-app` rejects the package id with an error that names neither id
+
+- **Task attempted:** Launch an installed app on the Vega Virtual Device from
+  the CLI, having just installed it successfully.
+- **Steps taken:** `manifest.toml` declares `[package] id =
+  "com.fourkinc.gaptrack"` as the first and most prominent identifier in the
+  file; the component id `com.fourkinc.gaptrack.main` appears 30 lines later
+  under `[[components.interactive]]`. Ran
+  `vega device launch-app -a com.fourkinc.gaptrack`.
+- **Expected result:** Either the app launches, or an error naming which
+  identifier the flag wants.
+- **Actual result:**
+  `Vega operation FAILED due to an irrecoverable error: Failed: App could not
+  be determined`
+  The `-a` flag wants the **component** id, not the package id.
+  `vega device launch-app -a com.fourkinc.gaptrack.main` works immediately.
+  The error names neither the value it received nor the one it expected, and
+  `vega device installed-apps` prints `com.fourkinc.gaptrack.main` — so the
+  correct value is discoverable, but only if you already suspect the one you
+  used was wrong rather than that the install failed.
+- **Severity:** Low. Costs a few minutes once, but the phrasing points at the
+  install rather than at the argument, which is the wrong place to look.
+- **Suggested fix:** Echo the received identifier and list the launchable
+  component ids: `App "com.fourkinc.gaptrack" could not be determined. Did you
+  mean "com.fourkinc.gaptrack.main"?`
+- **Environment:** Vega SDK 0.24.12044, VVD `tv - aarch64`, macOS 26.5.2.
+
+### 12. The package manager warns about a missing app icon that no local schema documents
+
+- **Task attempted:** Clear every warning the device logs on install, before
+  submitting.
+- **Steps taken:** After `vega device install-app`, pulled the device log with
+  `vega device copy-logs --artifact main/var_log --directory /tmp/vlogs`.
+- **Expected result:** A clean install, or a warning pointing at the manifest
+  key to add.
+- **Actual result:**
+  `E pkgmgr-registrar:[PackageRegistrar.cpp:1057] Empty application icon file
+  name for package 'com.fourkinc.gaptrack'. It might not be defined in
+  manifest.`
+  The message is right that it is not defined. It does not say what to define.
+  Searching the entire installed SDK for the key found nothing:
+  no `.toml` under `~/vega/sdk/.../0.24.12044` mentions `icon`, no manifest
+  JSON schema ships with the SDK, and no `icon`-shaped key appears in any
+  `@amazon-devices/*` package in `node_modules`. The generated project ships
+  no `assets/` icon and no manifest entry for one, so every scaffolded app
+  logs this error on first install.
+  Left unfixed rather than guessing a key name, since an invented manifest
+  field would fail validation less visibly than the warning it replaced.
+- **Severity:** Low-Medium. Cosmetic in the emulator, but the icon is what a
+  Fire TV home screen shows, so every developer hits this at submission time
+  with no local source of truth for the fix.
+- **Suggested fix:** Ship the manifest schema with the SDK, or name the key in
+  the error: `... icon not defined; add [package] icon = "assets/icon.png"`.
+  A placeholder icon in the generated project would fix it for everyone.
+- **Environment:** Vega SDK 0.24.12044, VVD `tv - aarch64`, macOS 26.5.2.
