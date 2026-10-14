@@ -47,6 +47,14 @@ const TITLES: Title[] = [
     videoUrl: '', // replaced from the attached track; see below
   },
   {
+    // The headline title: a real film, feature-length silences, real
+    // dialogue, and no audio description anywhere it is published.
+    id: 'sintel',
+    name: 'Sintel',
+    attribution: '(c) copyright Blender Foundation · CC-BY 3.0 · durian.blender.org',
+    videoUrl: '', // replaced from the attached track; see below
+  },
+  {
     id: 'archive-reel',
     name: 'Archive Reel',
     attribution: 'Public domain',

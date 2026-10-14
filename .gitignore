@@ -1,5 +1,8 @@
 # Vega / React Native
 node_modules/
+# Written by the Vega build on every run; not an input to it.
+buildinfo.json
+generated/
 .vega/
 build/
 dist/
