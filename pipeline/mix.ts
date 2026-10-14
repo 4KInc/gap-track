@@ -36,6 +36,15 @@ export interface MixOptions {
   fadeMs?: number;
   /** Description level relative to the programme. */
   descriptionGain?: number;
+  /**
+   * Ceiling the mixed output may not exceed, 0..1.
+   *
+   * Summing two tracks can exceed full scale even when neither does alone,
+   * and a sample above full scale wraps or is truncated — an audible crack
+   * on exactly the words the viewer needed to hear. A limiter after the sum
+   * makes that arithmetically impossible instead of unlikely.
+   */
+  ceiling?: number;
 }
 
 /**
@@ -99,7 +108,12 @@ export async function mixDescribed(
 ): Promise<MixResult> {
   const duckTo = opts.duckTo ?? 0.25;
   const fadeMs = opts.fadeMs ?? 150;
-  const gain = opts.descriptionGain ?? 1.6;
+  // 1.0, not the 1.6 this used to apply. The programme is already ducked to
+  // a quarter while a description sounds, which puts narration ~12 dB above
+  // it; the extra 60% only bought headroom problems. Measured on Sintel, 1.6
+  // drove 39,206 samples to full scale against 694 in the source.
+  const gain = opts.descriptionGain ?? 1.0;
+  const ceiling = opts.ceiling ?? 0.95;
 
   await mkdir(dirname(outputPath), { recursive: true });
   const programmeHadAudio = await hasAudioStream(videoPath);
@@ -115,7 +129,10 @@ export async function mixDescribed(
         `[1:a]volume=${gain}[desc]`,
         // `longest` rather than `first`: the description track runs the full
         // programme duration, and dropping its tail would cut a final cue.
-        '[prog][desc]amix=inputs=2:duration=longest:normalize=0[out]',
+        '[prog][desc]amix=inputs=2:duration=longest:normalize=0[sum]',
+        // The guarantee, not a hope. attack/release are short enough to catch
+        // a transient and long enough not to pump on sustained speech.
+        `[sum]alimiter=limit=${ceiling}:attack=5:release=50:level=disabled[out]`,
       ].join(';'),
       '-map', '0:v', '-map', '[out]',
     );

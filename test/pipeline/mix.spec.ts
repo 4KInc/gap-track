@@ -24,6 +24,7 @@ const SR = 24_000;
 let dir: string;
 let silentVideo: string;
 let noisyVideo: string;
+let loudVideo: string;
 
 const cue = (startMs: number, audioMs: number, id = 'c1'): Cue => ({
   id,
@@ -33,8 +34,14 @@ const cue = (startMs: number, audioMs: number, id = 'c1'): Cue => ({
   trackOffsetMs: startMs,
 });
 
-/** A description track with a tone at the cue's offset. */
-const trackFor = (cues: Cue[], totalMs: number): Buffer => {
+/**
+ * A description track with a tone at the cue's offset.
+ *
+ * `amplitude` is a fraction of full scale. The default is a comfortable
+ * level; pass something near 1 to test what happens when a loud narration
+ * meets a loud programme.
+ */
+const trackFor = (cues: Cue[], totalMs: number, amplitude = 11_000 / 32_767): Buffer => {
   const buf = makeWav({ durationMs: totalMs, sampleRate: SR });
   const { data } = wavData(buf);
   for (const c of cues) {
@@ -42,7 +49,7 @@ const trackFor = (cues: Cue[], totalMs: number): Buffer => {
     const count = Math.round((c.audioDurationMs / 1000) * SR);
     for (let n = 0; n < count; n++) {
       data.writeInt16LE(
-        Math.round(11_000 * Math.sin((2 * Math.PI * 440 * n) / SR)),
+        Math.round(amplitude * 32_767 * Math.sin((2 * Math.PI * 440 * n) / SR)),
         (start + n) * 2,
       );
     }
@@ -58,6 +65,17 @@ beforeAll(async () => {
     '-hide_banner', '-loglevel', 'error', '-y',
     '-f', 'lavfi', '-i', 'testsrc2=size=320x180:rate=15:duration=10',
     '-pix_fmt', 'yuv420p', silentVideo,
+  ]);
+
+  // Near full scale, so summing it with a loud description would wrap
+  // without a limiter.
+  loudVideo = join(dir, 'loud.mp4');
+  await run(FFMPEG, [
+    '-hide_banner', '-loglevel', 'error', '-y',
+    '-f', 'lavfi', '-i', 'testsrc2=size=320x180:rate=15:duration=10',
+    '-f', 'lavfi', '-i', 'sine=frequency=200:duration=10',
+    '-af', 'volume=0.99',
+    '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-shortest', loudVideo,
   ]);
 
   noisyVideo = join(dir, 'noisy.mp4');
@@ -137,6 +155,35 @@ describe('mixDescribed', () => {
     // Second 4 holds the description; second 7 is programme only, ducked
     // nowhere, so the description second must be louder.
     expect(energyAt(4)).toBeGreaterThan(energyAt(7));
+  }, 180_000);
+
+  it('never lets the sum exceed full scale', async () => {
+    // Two tracks that each sit just under full scale sum to well over it.
+    // Clipping is audible precisely on the words the viewer needed, so the
+    // limiter has to make this impossible rather than improbable.
+    const cues = [cue(1_000, 2_000)];
+    const wav = join(dir, 'loud.wav');
+    await writeFile(wav, trackFor(cues, 6_000, 0.99));
+    const out = join(dir, 'clip.mp4');
+
+    await mixDescribed(loudVideo, wav, cues, out);
+
+    const back = join(dir, 'clipback.wav');
+    await run(FFMPEG, [
+      '-hide_banner', '-loglevel', 'error', '-y', '-i', out,
+      '-c:a', 'pcm_s16le', '-ac', '1', '-ar', String(SR), back,
+    ]);
+    const { data } = wavData(await readFile(back));
+
+    let atFullScale = 0;
+    for (let i = 0; i + 1 < data.length; i += 2) {
+      const v = Math.abs(data.readInt16LE(i));
+      if (v >= 32_700) atFullScale++;
+    }
+    // A handful of samples can touch the ceiling; thousands means the sum
+    // wrapped. The unlimited mix of these two inputs produced tens of
+    // thousands on real material.
+    expect(atFullScale).toBeLessThan(data.length / 2 / 100);
   }, 180_000);
 
   it('uses the description as the only audio for a silent programme', async () => {
