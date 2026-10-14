@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { assembleTrack, summarise, type Candidate } from '../../pipeline/assemble';
-import { makeWav, wavData, wavInfo } from '../../pipeline/synthesis/wav';
+import { makeWav, wavData } from '../../pipeline/synthesis/wav';
 import type { SynthesisResult, Synthesizer } from '../../pipeline/synthesis/types';
 
 const SR = 24_000;

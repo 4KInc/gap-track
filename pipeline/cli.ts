@@ -21,6 +21,8 @@ const run = promisify(execFile);
 
 import { ClaudeDescriber, claudeConfigured } from './describe/claude';
 import { SayVoice } from './synthesis/say';
+import { PollyVoice } from './synthesis/polly';
+import type { Synthesizer } from './synthesis/types';
 import { buildTrack } from './build';
 import { mixDescribed } from './mix';
 import { ensureBucket, publishHls } from './publish';
@@ -37,6 +39,7 @@ interface Args {
   minGap?: number;
   margin?: number;
   voice?: string;
+  synth?: string;
   mix: boolean;
   publish?: string;
   transcode: boolean;
@@ -54,6 +57,7 @@ function parseArgs(argv: string[]): Args {
     else if (a === '--min-gap') args.minGap = Number(next());
     else if (a === '--margin') args.margin = Number(next());
     else if (a === '--voice') args.voice = next();
+    else if (a === '--synth') args.synth = next();
     else if (a === '--dry') args.dry = true;
     else if (a === '--mix') args.mix = true;
     else if (a === '--publish') args.publish = next();
@@ -79,7 +83,8 @@ Build a description track for a film.
 
   --min-gap <ms>      shortest silence worth using (default 1200)
   --margin <ms>       safety margin                (default 250, measured)
-  --voice <name>      macOS say voice              (default Samantha)
+  --synth <polly|say> synthesiser                  (default polly)
+  --voice <name>      voice name for that engine   (Joanna / Samantha)
   --dry               skip the API, placeholder text
   --mix               also render <title>-described.mp4
   --publish <bucket>  upload the track to S3 and print its https URL
@@ -110,6 +115,26 @@ class PlaceholderDescriber implements Describer {
   }
 }
 
+/**
+ * Pick a synthesiser.
+ *
+ * Polly by default: it runs anywhere, and `say` is macOS-only, so defaulting
+ * to the local one would make the pipeline silently unbuildable on Linux and
+ * in CI. `say` stays available for working without credentials or a network.
+ *
+ * Both measure the rendered file, so the guarantee does not depend on which
+ * one is chosen — only the voice does.
+ */
+function makeSynth(args: Args): Synthesizer {
+  const which = (args.synth ?? 'polly').toLowerCase();
+  if (which === 'say') return new SayVoice({ voice: args.voice });
+  if (which === 'polly') {
+    return new PollyVoice(args.voice ? { voice: args.voice as never } : {});
+  }
+  process.stderr.write(`unknown --synth ${which}; expected polly or say\n`);
+  process.exit(2);
+}
+
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
 
@@ -135,7 +160,7 @@ async function main(): Promise<void> {
     captionsPath: args.captions as string,
     outDir: args.out,
     describer: args.dry ? new PlaceholderDescriber() : new ClaudeDescriber(),
-    synth: new SayVoice({ voice: args.voice }),
+    synth: makeSynth(args),
     config: args.margin ? { safetyMarginMs: args.margin } : undefined,
     minGapMs: args.minGap,
     log: (line) => process.stdout.write(`${line}\n`),

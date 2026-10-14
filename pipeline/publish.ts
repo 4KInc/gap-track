@@ -16,7 +16,7 @@
 
 import { execFile } from 'node:child_process';
 import { readdir } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 
 const run = promisify(execFile);

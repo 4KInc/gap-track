@@ -4,7 +4,7 @@
  * than against a file some tool produced.
  */
 
-import { wavInfo, makeWav } from '../../pipeline/synthesis/wav';
+import { wavInfo, makeWav, wrapPcm } from '../../pipeline/synthesis/wav';
 
 describe('wavInfo: exact duration from the header', () => {
   it('measures a known-length file', () => {
@@ -105,5 +105,36 @@ describe('wavInfo: refuses rather than guesses', () => {
     const buf = makeWav({ durationMs: 100 });
     buf.write('XXXX', buf.indexOf(Buffer.from('data', 'ascii'), 12), 'ascii');
     expect(() => wavInfo(buf)).toThrow(/no data chunk/);
+  });
+});
+
+describe('wrapPcm: giving Polly output a measurable container', () => {
+  it('reports the duration the sample count implies', () => {
+    const sampleRate = 16_000;
+    // Exactly one second of 16-bit mono silence.
+    const pcm = Buffer.alloc(sampleRate * 2);
+    expect(wavInfo(wrapPcm(pcm, { sampleRate })).durationMs).toBe(1_000);
+  });
+
+  it('keeps every PCM byte intact', () => {
+    const pcm = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]);
+    const wav = wrapPcm(pcm, { sampleRate: 16_000 });
+    expect(wav.length).toBe(44 + pcm.length);
+    expect(wav.subarray(44)).toEqual(pcm);
+  });
+
+  it('describes itself honestly in the header', () => {
+    const wav = wrapPcm(Buffer.alloc(3_200), { sampleRate: 16_000 });
+    const info = wavInfo(wav);
+    expect(info.sampleRate).toBe(16_000);
+    expect(info.channels).toBe(1);
+    expect(info.bitsPerSample).toBe(16);
+  });
+
+  it('does not take the duration on trust from the caller', () => {
+    // The signature has no durationMs, which is the whole point: a caller
+    // that could assert a duration would have no reason to measure one.
+    const odd = wrapPcm(Buffer.alloc(16_000 * 2 * 1.5), { sampleRate: 16_000 });
+    expect(wavInfo(odd).durationMs).toBe(1_500);
   });
 });

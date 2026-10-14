@@ -78,6 +78,14 @@ export function PlayerScreen({
   const engine = useRef<DescriptionPlayer | null>(null);
   const playheadRef = useRef(0);
   playheadRef.current = playheadMs;
+
+  // The tick loop below is created once and must not capture either of these
+  // by closure. useVegaPlayers returns a fresh object every render and fills
+  // its players in asynchronously, so a loop that closed over the first
+  // render's value would hold null for the life of the screen and never tick
+  // the engine at all.
+  const videoRef = useRef<ReturnType<typeof useVegaPlayers>['video']>(null);
+  videoRef.current = players.video;
   const merged: SchedulerConfig = { ...DEFAULT_CONFIG, ...config };
 
   // Build the engine once both players exist, and give it the cue list.
@@ -111,8 +119,7 @@ export function PlayerScreen({
   useEffect(() => {
     const id = setInterval(() => {
       const p = engine.current;
-      const v = players.video;
-      if (!p || !v) return;
+      if (!p || !videoRef.current) return;
 
       // Drive the engine from whichever clock is live. On a device that can
       // decode, that is the programme; where it cannot, wall time, and the

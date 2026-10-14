@@ -100,6 +100,27 @@ export function wavData(buf: Buffer): { info: WavInfo; data: Buffer } {
   throw new Error('WAV has no data chunk');
 }
 
+/**
+ * Wrap raw PCM samples in a WAV container.
+ *
+ * Polly returns headerless PCM, which nothing downstream can measure or play.
+ * Wrapping it here rather than in the Polly client keeps every byte-level
+ * assumption about WAV in this one file.
+ *
+ * The duration is NOT passed in: it falls out of the sample count, which is
+ * the only honest source for it. A caller who already believed they knew the
+ * duration would have no reason to measure, and measuring is the point.
+ */
+export function wrapPcm(
+  pcm: Buffer,
+  opts: { sampleRate: number; channels?: number; bitsPerSample?: number },
+): Buffer {
+  const channels = opts.channels ?? 1;
+  const bitsPerSample = opts.bitsPerSample ?? 16;
+  const header = header44(pcm.length, opts.sampleRate, channels, bitsPerSample);
+  return Buffer.concat([header, pcm]);
+}
+
 /** Build a minimal WAV, used by the tests and handy for silence padding. */
 export function makeWav(opts: {
   durationMs: number;
@@ -113,7 +134,21 @@ export function makeWav(opts: {
   const byteRate = sampleRate * channels * (bitsPerSample / 8);
   const dataBytes = Math.round((opts.durationMs / 1000) * byteRate);
 
-  const buf = Buffer.alloc(44 + dataBytes);
+  return Buffer.concat([
+    header44(dataBytes, sampleRate, channels, bitsPerSample),
+    Buffer.alloc(dataBytes),
+  ]);
+}
+
+/** The canonical 44-byte RIFF/fmt/data header for uncompressed PCM. */
+function header44(
+  dataBytes: number,
+  sampleRate: number,
+  channels: number,
+  bitsPerSample: number,
+): Buffer {
+  const byteRate = sampleRate * channels * (bitsPerSample / 8);
+  const buf = Buffer.alloc(44);
   buf.write('RIFF', 0, 'ascii');
   buf.writeUInt32LE(36 + dataBytes, 4);
   buf.write('WAVE', 8, 'ascii');

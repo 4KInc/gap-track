@@ -102,7 +102,7 @@ export function parseCaptions(
   opts: { bracketedIsNonSpeech?: boolean } = {},
 ): SpeechInterval[] {
   const bracketedIsNonSpeech = opts.bracketedIsNonSpeech ?? true;
-  const lines = source.replace(/^﻿/, '').split(/\r?\n/);
+  const lines = source.replace(/^\uFEFF/, '').split(/\r?\n/);
   const out: SpeechInterval[] = [];
 
   for (let i = 0; i < lines.length; i++) {
