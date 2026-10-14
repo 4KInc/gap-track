@@ -14,8 +14,14 @@ import {
   type SpeechInterval,
 } from '../../src/engine/gaps';
 
+/**
+ * Splitting is off unless a test asks for it. Inversion and subdivision are
+ * separate behaviours and a shared default would make every inversion test
+ * also a subdivision test, so a break in one would surface as noise in both.
+ */
 const opts = (durationMs: number, over = {}) => ({
   ...DEFAULT_GAP_OPTIONS,
+  maxGapMs: Number.MAX_SAFE_INTEGER,
   durationMs,
   ...over,
 });
@@ -236,5 +242,52 @@ describe('contextBefore: selection, not compression', () => {
 
   it('respects the window', () => {
     expect(contextBefore({ startMs: 60_000, durationMs: 1_000 }, speech, 5_000)).toBe('');
+  });
+});
+
+describe('gapsFromSpeech: long silences are divided, not described as one', () => {
+  it('splits a silence too long for a single remark', () => {
+    // 107s of silence opens Sintel. Left whole it buys a budget of a few
+    // hundred words: one paragraph spoken over a scene that has changed
+    // three times since it began.
+    const gaps = gapsFromSpeech([sp(107_000, 110_000)], opts(110_000, { padMs: 0, maxGapMs: 8_000 }));
+    expect(gaps.length).toBeGreaterThan(10);
+    for (const g of gaps) expect(g.durationMs).toBeLessThanOrEqual(8_000);
+  });
+
+  it('leaves a gap that already fits alone', () => {
+    const gaps = gapsFromSpeech([sp(5_000, 6_000)], opts(11_000, { padMs: 0, maxGapMs: 8_000 }));
+    expect(gaps).toEqual([
+      { startMs: 0, durationMs: 5_000 },
+      { startMs: 6_000, durationMs: 5_000 },
+    ]);
+  });
+
+  it('divides evenly rather than leaving a runt at the end', () => {
+    // 18s at an 8s cap is 3 slots of 6s, not 8+8+2. A two-second offcut
+    // would be described in three words for no reason but arithmetic.
+    const gaps = gapsFromSpeech([sp(18_000, 19_000)], opts(19_000, { padMs: 0, maxGapMs: 8_000 }));
+    expect(gaps).toHaveLength(3);
+    for (const g of gaps) expect(g.durationMs).toBe(6_000);
+  });
+
+  it('keeps the slots contiguous and inside the original silence', () => {
+    const gaps = gapsFromSpeech([sp(40_000, 41_000)], opts(41_000, { padMs: 0, maxGapMs: 8_000 }));
+    expect(gaps[0].startMs).toBe(0);
+    const last = gaps[gaps.length - 1];
+    expect(last.startMs + last.durationMs).toBe(40_000);
+    for (let i = 1; i < gaps.length; i++) {
+      expect(gaps[i].startMs).toBe(gaps[i - 1].startMs + gaps[i - 1].durationMs);
+    }
+  });
+
+  it('never emits a slot below the minimum', () => {
+    for (const total of [9_000, 12_500, 17_000, 25_300, 107_000]) {
+      const gaps = gapsFromSpeech(
+        [sp(total, total + 1_000)],
+        opts(total + 1_000, { padMs: 0, maxGapMs: 8_000 }),
+      );
+      for (const g of gaps) expect(g.durationMs).toBeGreaterThanOrEqual(1_200);
+    }
   });
 });

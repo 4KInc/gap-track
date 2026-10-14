@@ -45,6 +45,17 @@ export interface GapOptions {
   durationMs: number;
 
   /**
+   * Longest single describable slot.
+   *
+   * A silence of two minutes is not one description, it is several. Left
+   * whole it buys a word budget of a few hundred, which produces one
+   * rambling paragraph spoken over a scene that has moved on three times
+   * since it began. Real description practice places short remarks as
+   * things happen, so long gaps are divided into slots of at most this.
+   */
+  maxGapMs: number;
+
+  /**
    * Treat captions that are entirely bracketed — `[MUSIC]`, `(door creaks)` —
    * as non-speech, leaving them inside gaps.
    *
@@ -57,6 +68,8 @@ export interface GapOptions {
 
 export const DEFAULT_GAP_OPTIONS: Omit<GapOptions, 'durationMs'> = {
   minGapMs: 1_200,
+  // Eight seconds is about twenty words: a long sentence, not a paragraph.
+  maxGapMs: 8_000,
   padMs: 150,
   bracketedIsNonSpeech: true,
 };
@@ -156,11 +169,33 @@ export function gapsFromSpeech(
   const merged = mergeSpeech(speech);
   const gaps: Gap[] = [];
 
+  const maxGapMs = options.maxGapMs ?? DEFAULT_GAP_OPTIONS.maxGapMs;
+
   const push = (rawStart: number, rawEnd: number) => {
     const startMs = rawStart + padMs;
     const endMs = rawEnd - padMs;
-    const d = endMs - startMs;
-    if (d >= minGapMs) gaps.push({ startMs, durationMs: d });
+    const total = endMs - startMs;
+    if (total < minGapMs) return;
+
+    if (total <= maxGapMs) {
+      gaps.push({ startMs, durationMs: total });
+      return;
+    }
+
+    // Divide evenly rather than taking maxGapMs slices and leaving a runt at
+    // the end: an even split keeps every remark a similar length, and a
+    // two-second offcut after four full slots would be described in three
+    // words for no reason other than arithmetic.
+    const slots = Math.ceil(total / maxGapMs);
+    const each = Math.floor(total / slots);
+    for (let i = 0; i < slots; i++) {
+      const slotStart = startMs + i * each;
+      // The last slot absorbs the rounding remainder.
+      const slotLength = i === slots - 1 ? endMs - slotStart : each;
+      if (slotLength >= minGapMs) {
+        gaps.push({ startMs: slotStart, durationMs: slotLength });
+      }
+    }
   };
 
   if (merged.length === 0) {
