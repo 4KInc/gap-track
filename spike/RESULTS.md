@@ -50,7 +50,13 @@ flattery is most likely.
 | machine pass | | |
 | **what you actually heard** | | |
 
-**Verdict:** UNANSWERABLE ON THE EMULATOR. The VVD has no audio device
+**Verdict:** UNANSWERABLE ON THE EMULATOR, and more so than first recorded.
+The device has no audio output (entry 9) and cannot decode video at all
+(entry 10) — Apple's own reference stream fails identically. An earlier note
+here recorded the Shaka path as working; that test checked `readyState >= 1`,
+which proves a manifest parsed and nothing more.
+
+ The VVD has no audio device
 configured (see FRICTION.md entry 9), so audibility cannot be tested here at
 all. Machine-side evidence — whether both players' clocks advance while
 overlapping — still indicates whether the platform *permits* two concurrent

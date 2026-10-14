@@ -34,10 +34,11 @@ interface Args {
   voice?: string;
   mix: boolean;
   publish?: string;
+  transcode: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { out: 'build/tracks', dry: false, mix: false };
+  const args: Args = { out: 'build/tracks', dry: false, mix: false, transcode: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => argv[++i];
@@ -51,6 +52,7 @@ function parseArgs(argv: string[]): Args {
     else if (a === '--dry') args.dry = true;
     else if (a === '--mix') args.mix = true;
     else if (a === '--publish') args.publish = next();
+    else if (a === '--transcode') args.transcode = true;
     else if (a === '--help' || a === '-h') {
       usage();
       process.exit(0);
@@ -76,6 +78,9 @@ Build a description track for a film.
   --dry               skip the API, placeholder text
   --mix               also render <title>-described.mp4
   --publish <bucket>  upload the track to S3 and print its https URL
+  --transcode         re-encode the programme to 360p H.264 main profile.
+                      The virtual device's software decoder refuses 720p
+                      High; real hardware does not need this.
 
 The Vega simulator has no audio hardware, so --mix produces the file that
 can actually be heard: the programme with its audio ducked under the
@@ -139,7 +144,9 @@ async function main(): Promise<void> {
 
     // Both streams, or the cue offsets refer to a video the device cannot
     // fetch. Packaging the programme is copy-only, so it costs seconds.
-    const v = await packageVideoHls(args.video as string, join(dir, 'video-hls'));
+    const v = await packageVideoHls(args.video as string, join(dir, 'video-hls'), {
+      transcode: args.transcode,
+    });
     process.stdout.write(`  programme: ${v.segmentCount} segments\n`);
 
     const up = await publishHls(join(dir, 'video-hls'), {

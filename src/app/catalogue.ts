@@ -57,6 +57,16 @@ const TITLES: Title[] = [
     attribution: 'Apple Inc. · developer test stream',
     videoUrl:
       'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+    // CONTROL. Apple's own reference stream, reached through the identical
+    // code path with an empty cue list. If this decodes and ours does not,
+    // the fault is in our packaging. If neither decodes, the device cannot
+    // play video at all and nothing about our pipeline is implicated.
+    description: {
+      trackUrl:
+        'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/a1/prog_index.m3u8',
+      manifest: { titleId: 'bipbop', durationMs: 1_800_000, cues: [] },
+      provenance: 'CONTROL — Apple reference stream, no descriptions',
+    },
   },
 ];
 

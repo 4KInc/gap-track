@@ -60,6 +60,15 @@ export function PlayerScreen({
   const [playheadMs, setPlayheadMs] = useState(0);
   const [events, setEvents] = useState<OverlayEvent[]>([]);
   const [speaking, setSpeaking] = useState<string | null>(null);
+  /**
+   * What the media element believes.
+   *
+   * Shaka loads asynchronously and a failure never reaches the try/catch
+   * that started it, so without this a stream that never loads is
+   * indistinguishable from a stream that is merely slow — both show a black
+   * rectangle and a frozen clock.
+   */
+  const [media, setMedia] = useState('—');
 
   const engine = useRef<DescriptionPlayer | null>(null);
   const merged: SchedulerConfig = { ...DEFAULT_CONFIG, ...config };
@@ -80,6 +89,15 @@ export function PlayerScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players.ready, manifest]);
 
+  // Start the programme as soon as it is ready. A viewer who pressed Watch
+  // has asked for the film; whether anything is narrated over it is a
+  // separate choice, and gating playback on that choice leaves them looking
+  // at a black rectangle wondering what they did wrong.
+  useEffect(() => {
+    if (!players.ready || !players.video) return;
+    void players.video.play();
+  }, [players.ready, players.video]);
+
   // One loop drives everything. Reading the playhead from the programme
   // rather than a wall clock means a description can never be scheduled
   // against a time the viewer is not actually at.
@@ -91,6 +109,22 @@ export function PlayerScreen({
 
       p.tick();
       setPlayheadMs(toMs(v.currentTime));
+
+      const probe = v as unknown as {
+        readyState?: number;
+        duration?: number;
+        paused?: boolean;
+        error?: { code?: number; message?: string } | null;
+      };
+      const READY = ['NOTHING', 'METADATA', 'CURRENT', 'FUTURE', 'ENOUGH'];
+      const err = probe.error
+        ? ` err=${probe.error.code} "${(probe.error.message ?? '').slice(0, 60)}"`
+        : '';
+      setMedia(
+        `ready=${READY[probe.readyState ?? 0] ?? probe.readyState}`
+        + ` dur=${Number.isFinite(probe.duration) ? (probe.duration ?? 0).toFixed(1) : 'NaN'}`
+        + ` paused=${probe.paused}${err}`,
+      );
 
       const now = p.currentDecisions();
       if (now.length) {
@@ -104,11 +138,8 @@ export function PlayerScreen({
   const choose = useCallback((next: DescriptionMode) => {
     setMode(next);
     engine.current?.setMode(next);
-    if (next !== 'off') {
-      void players.video?.play();
-      engine.current?.resume();
-    }
-  }, [players.video]);
+    if (next !== 'off') engine.current?.resume();
+  }, []);
 
   if (players.error) {
     return (
@@ -160,6 +191,8 @@ export function PlayerScreen({
           {onBack ? <Focusable label="Back" compact onPress={onBack} /> : null}
         </View>
 
+        <Text style={styles.diag}>{media}</Text>
+
         {mode === 'pause-describe' ? (
           <Text style={styles.note}>
             The film pauses for each description, then resumes. Nothing is ever spoken over dialogue.
@@ -205,5 +238,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: space.sm },
   modeButton: { marginRight: space.sm },
   note: { color: colour.inkMuted, fontSize: type.label, marginTop: space.xs },
+  diag: { color: colour.signal, fontSize: type.tiny, fontFamily: mono, marginTop: space.xs },
   error: { color: colour.signal, fontSize: type.body, marginVertical: space.md },
 });

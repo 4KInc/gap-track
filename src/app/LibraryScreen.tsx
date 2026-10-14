@@ -11,7 +11,7 @@
  */
 
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Focusable } from './Focusable';
 import { colour, radius, space, type } from './theme';
@@ -24,6 +24,7 @@ export interface LibraryScreenProps {
 
 export function LibraryScreen({ titles, onOpen }: LibraryScreenProps): React.JSX.Element {
   const described = describedCount(titles);
+  const [focusedLabel, setFocusedLabel] = React.useState<string | null>(null);
 
   return (
     <View style={styles.root}>
@@ -32,11 +33,24 @@ export function LibraryScreen({ titles, onOpen }: LibraryScreenProps): React.JSX
         {described} of {titles.length} titles can be followed without sight.
       </Text>
 
-      <ScrollView style={styles.list}>
+      <View style={styles.list}>
         {titles.map((t, i) => (
-          <Row key={t.id} title={t} autoFocus={i === 0} onOpen={onOpen} />
+          <Row
+            key={t.id}
+            title={t}
+            autoFocus={i === 0}
+            onOpen={onOpen}
+            onFocusChange={setFocusedLabel}
+          />
         ))}
-      </ScrollView>
+      </View>
+
+      {/* Which control the remote is actually on. Without this, a press that
+          goes nowhere is indistinguishable from a dead app — the failure that
+          cost days in the spike. */}
+      <Text style={styles.focusNote}>
+        focus: {focusedLabel ?? 'nothing yet — press a direction on the remote'}
+      </Text>
     </View>
   );
 }
@@ -45,10 +59,12 @@ function Row({
   title,
   autoFocus,
   onOpen,
+  onFocusChange,
 }: {
   title: Title;
   autoFocus: boolean;
   onOpen: (t: Title) => void;
+  onFocusChange: (label: string) => void;
 }) {
   const has = Boolean(title.description);
 
@@ -79,27 +95,28 @@ function Row({
         label={has ? 'Watch' : 'Watch without description'}
         autoFocus={autoFocus}
         onPress={() => onOpen(title)}
+        onFocusChange={onFocusChange}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colour.ground, padding: space.safe },
-  brand: { color: colour.ink, fontSize: type.display, marginBottom: space.xs },
-  summary: { color: colour.inkMuted, fontSize: type.body, marginBottom: space.lg },
-  list: { flex: 1 },
+  root: { flex: 1, backgroundColor: colour.ground, paddingHorizontal: space.safe, paddingVertical: space.lg },
+  brand: { color: colour.ink, fontSize: type.title, marginBottom: space.xs },
+  summary: { color: colour.inkMuted, fontSize: type.body, marginBottom: space.md },
+  list: { flex: 1, justifyContent: 'center' },
 
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: space.md,
+    paddingVertical: space.sm,
     borderBottomWidth: 1,
     borderBottomColor: colour.line,
   },
   meta: { flex: 1, paddingRight: space.lg },
-  name: { color: colour.ink, fontSize: type.title },
+  name: { color: colour.ink, fontSize: type.body },
   attribution: { color: colour.inkMuted, fontSize: type.tiny, marginTop: 2 },
 
   badge: {
@@ -116,4 +133,5 @@ const styles = StyleSheet.create({
   badgeTextOff: { color: colour.signal },
 
   provenance: { color: colour.inkMuted, fontSize: type.tiny, marginTop: space.xs },
+  focusNote: { color: colour.inkMuted, fontSize: type.tiny, marginTop: space.md },
 });

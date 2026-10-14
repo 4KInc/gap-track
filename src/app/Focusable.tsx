@@ -40,6 +40,8 @@ export interface FocusableProps {
   style?: ViewStyle;
   /** Smaller treatment for dense rows such as the settings list. */
   compact?: boolean;
+  /** Reports which control holds focus, for the on-screen diagnostic. */
+  onFocusChange?: (label: string) => void;
 }
 
 export function Focusable({
@@ -50,18 +52,35 @@ export function Focusable({
   disabled = false,
   style,
   compact = false,
+  onFocusChange,
 }: FocusableProps): React.JSX.Element {
   const ref = useRef<View | null>(null);
   const [focused, setFocused] = useState(false);
+  // Read inside the seeding interval, which closes over the initial state.
+  const focusedRef = useRef(false);
 
   useEffect(() => {
     if (!autoFocus) return undefined;
-    // A frame's grace: the native view has to exist before it can hold focus.
-    const t = setTimeout(() => {
+
+    // Retry rather than fire once. A single delayed attempt assumes the
+    // native view exists by then, and when it does not the seed is silently
+    // lost — which presents as an app that renders perfectly and ignores
+    // every button press. Keep trying until focus actually lands.
+    let attempts = 0;
+    const id = setInterval(() => {
+      attempts++;
       const tag = ref.current ? findNodeHandle(ref.current) : null;
-      if (tag != null) FocusManager.focus(tag);
-    }, 300);
-    return () => clearTimeout(t);
+      if (tag != null) {
+        try {
+          FocusManager.focus(tag);
+        } catch {
+          // Keep trying; the view may not be attached yet.
+        }
+      }
+      // Stop once focus is confirmed, or after ~3s rather than forever.
+      if (focusedRef.current || attempts > 20) clearInterval(id);
+    }, 150);
+    return () => clearInterval(id);
   }, [autoFocus]);
 
   const handle = useCallback(() => {
@@ -74,8 +93,15 @@ export function Focusable({
       focusable={!disabled}
       disabled={disabled}
       onPress={handle}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      onFocus={() => {
+        focusedRef.current = true;
+        setFocused(true);
+        onFocusChange?.(label);
+      }}
+      onBlur={() => {
+        focusedRef.current = false;
+        setFocused(false);
+      }}
       style={[
         styles.base,
         compact && styles.compact,

@@ -16,7 +16,7 @@ export interface AttachedTrack {
 
 export const ATTACHED: Record<string, AttachedTrack> = {
   "bbb": {
-    "videoUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/bbb/video/index.m3u8",
+    "videoUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/bbb/video/master.m3u8",
     "trackUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/bbb/description/index.m3u8",
     "manifest": {
       "titleId": "bbb",

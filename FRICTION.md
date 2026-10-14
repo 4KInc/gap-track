@@ -143,7 +143,7 @@ given task, there is no entry. An empty section is an honest section.
   |---|---|---|
   | `file:///pkg/bundle/assets/.../clip.mp4` | REJECTED | `code=4 (SRC_NOT_SUPPORTED) msg=""` at **0ms** |
   | `https://.../Big_Buck_Bunny_720_10s_5MB.mp4` | REJECTED | `code=3 (DECODE) msg="Error Occurred."` after **50ms** |
-  | `https://.../bipbop_adv_example_fmp4/master.m3u8` via Shaka | **ACCEPTED** | — |
+  | `https://.../bipbop_adv_example_fmp4/master.m3u8` via Shaka | **manifest parsed** | — |
 
   These are two different failures, and the distinction matters. The `file://`
   case is rejected at 0ms without a fetch: the **scheme** is refused, so a
@@ -166,7 +166,12 @@ given task, there is no entry. An empty section is an honest section.
 - **Workaround:** Serve fragmented content over https and drive it through the
   Shaka port from
   [vega-video-sample](https://github.com/AmazonAppDev/vega-video-sample).
-  Confirmed working against Apple's `bipbop` fMP4 HLS stream.
+
+  **Correction.** This entry originally recorded the Shaka path as ACCEPTED.
+  That verdict used `readyState >= 1` (`HAVE_METADATA`) as its test, which
+  proves only that the manifest parsed and the duration is known. It does not
+  prove anything decoded, and on the virtual device nothing does — see entry
+  10. The row above is restated accordingly.
 - **Actionable suggestion:** State in the W3C Media API overview that `file://`
   is not a supported scheme and that progressive MP4 is not demuxed — MSE is
   required. Populate `MediaError.message` with the reason ("scheme not
@@ -328,3 +333,50 @@ given task, there is no entry. An empty section is an honest section.
   would have saved this entirely. Surfacing it at runtime would be better
   still: a warning on the first `AudioPlayer` construction, or a documented
   capability query so an app can detect it rather than infer it from silence.
+
+### 10. The Vega Virtual Device cannot decode video either
+
+- **Task attempted:** Play a described title in the finished app on the
+  virtual device.
+- **Steps taken:** Built the programme as fragmented HLS, published it to S3
+  with correct content types and CORS, confirmed from the host that the
+  playlist fetches and that ffmpeg decodes it. On device the picture stayed
+  black and the playhead stayed at zero. Added an on-screen readout of the
+  media element's own state, then pointed the identical code path at
+  **Apple's `img_bipbop_adv_example_fmp4` reference stream** as a control.
+- **Expected result:** The reference stream to play, isolating the fault to
+  our packaging.
+- **Actual result:** Both fail identically, verbatim:
+
+  ```
+  ready=METADATA dur=600.0 paused=false
+  err=3 "error msg[ Internal data stream error. ] debug info[ ../gstreamer-…"
+  ```
+
+  `dur=600.0` is correct for that stream, so the manifest parsed, the
+  duration is known, and `play()` was accepted. The failure is in the
+  decoder, for Amazon's own documented reference stream.
+
+  Combined with entry 9 — no audio device at all — **the virtual device can
+  run UI and nothing else.** It cannot play picture or sound.
+- **Severity:** High, and arguably the most consequential item here. The VVD
+  is presented as the way to develop without hardware, and the hackathon
+  rules accept it in place of a device for the demo video. For any media app
+  — which, on a television platform, is most of them — it can validate
+  layout, focus and logic, and not one frame of playback.
+
+  The diagnostics actively mislead. A developer sees a parsed manifest, a
+  correct duration, `paused=false` and no exception, then a black rectangle.
+  Every signal says the stream is fine. Three plausible fixes were tried
+  here — lower H.264 profile, an added audio track, a master playlist — all
+  wasted, because the premise that our stream was at fault was never true.
+- **Workaround:** None. Verify playback on hardware, and demonstrate media
+  behaviour by other means — this project renders a mixed file of the
+  programme with its descriptions so the result can be heard at all.
+- **Actionable suggestion:** State in the virtual-device documentation that
+  media playback is not emulated, next to the statement about audio. Better,
+  surface it at runtime: a `MediaError` whose message says "decoding is not
+  supported on the virtual device" instead of a GStreamer internal error
+  would end this in seconds rather than an evening. Best of all, emulate
+  decode — a simulator for a television that cannot show a picture is a
+  simulator for the one part of a TV app nobody doubts.

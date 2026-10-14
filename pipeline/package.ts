@@ -19,7 +19,7 @@
  */
 
 import { execFile } from 'node:child_process';
-import { mkdir, readFile, readdir } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 
@@ -179,7 +179,7 @@ function hlsInputFlags(input: string): string[] {
 export async function packageVideoHls(
   videoPath: string,
   outDir: string,
-  opts: { segmentSeconds?: number } = {},
+  opts: { segmentSeconds?: number; transcode?: boolean; height?: number } = {},
 ): Promise<{ playlistPath: string; segmentCount: number }> {
   const segmentSeconds = opts.segmentSeconds ?? 6;
   await mkdir(outDir, { recursive: true });
@@ -188,11 +188,31 @@ export async function packageVideoHls(
   const args = [
     '-hide_banner', '-loglevel', 'error', '-y',
     '-i', videoPath,
-    '-c:v', 'copy',
   ];
 
-  // Silent material has no audio stream to encode, and asking for one fails
-  // the mux rather than producing a video-only playlist.
+  if (opts.transcode) {
+    // Conservative H.264 for a constrained decoder. Kept as an option for
+    // real hardware with limited profile support; it does NOT help the
+    // virtual device, which cannot decode video at any profile — see
+    // FRICTION.md entry 10.
+    const height = opts.height ?? 360;
+    args.push(
+      '-c:v', 'libx264',
+      '-profile:v', 'main',
+      '-level', '3.1',
+      '-pix_fmt', 'yuv420p',
+      '-vf', `scale=-2:${height}`,
+      '-preset', 'veryfast',
+      '-g', '48', '-keyint_min', '48', '-sc_threshold', '0',
+    );
+  } else {
+    args.push('-c:v', 'copy');
+  }
+
+  // Silent material stays silent. A fabricated audio track was tried while
+  // chasing the decode failure and reverted once the control proved the
+  // device cannot decode video at all: inventing audio would hide that a
+  // film genuinely has none, which matters to the viewers this serves.
   if (await hasAudio(videoPath)) {
     args.push('-c:a', 'aac', '-b:a', '128k');
   } else {
@@ -214,6 +234,12 @@ export async function packageVideoHls(
 
   const segmentCount = (await readdir(outDir)).filter((f) => f.endsWith('.m4s')).length;
   if (segmentCount === 0) throw new Error(`packaging produced no video segments in ${outDir}`);
+
+  // Wrap the media playlist in a master. Every HLS stream this device is
+  // known to play is reached through one, and a player that expects a
+  // master will not say so — it fails later, in the decoder.
+  await writeMasterPlaylist(join(outDir, 'master.m3u8'), 'index.m3u8');
+
   return { playlistPath, segmentCount };
 }
 
@@ -225,4 +251,25 @@ async function hasAudio(path: string): Promise<boolean> {
     stderr = (err as { stderr?: string }).stderr ?? '';
   }
   return /Stream #\d+:\d+.*: Audio:/.test(stderr);
+}
+
+
+/**
+ * A single-variant master playlist pointing at the media playlist.
+ *
+ * Kept because most HLS clients expect to be handed a master and it costs
+ * nothing, not because it fixed anything — it was written while chasing a
+ * decode failure that turned out to be the device. Written by hand rather
+ * than by ffmpeg's variant muxer, which wants multiple renditions.
+ */
+async function writeMasterPlaylist(path: string, mediaPlaylist: string): Promise<void> {
+  const body = [
+    '#EXTM3U',
+    '#EXT-X-VERSION:7',
+    '#EXT-X-INDEPENDENT-SEGMENTS',
+    '#EXT-X-STREAM-INF:BANDWIDTH=900000,CODECS="avc1.4d401f,mp4a.40.2",RESOLUTION=640x360',
+    mediaPlaylist,
+    '',
+  ].join('\n');
+  await writeFile(path, body, 'utf8');
 }
