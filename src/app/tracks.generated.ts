@@ -25,988 +25,998 @@ export const ATTACHED: Record<string, AttachedTrack> = {
       "durationMs": 888060,
       "cues": [
         {
-          "id": "sintel-0000",
-          "gap": {
-            "startMs": 7789,
-            "durationMs": 7639
-          },
-          "text": "Snow-covered rocky slopes under pale mist. Title text appears, then fades as jagged peaks fill the view.",
-          "audioDurationMs": 6295,
-          "trackOffsetMs": 7789
-        },
-        {
           "id": "sintel-0001",
           "gap": {
-            "startMs": 30706,
+            "startMs": 15428,
             "durationMs": 7639
           },
-          "text": "A lone figure with a staff trudges across the snowfield, leaving a trail of footprints.",
-          "audioDurationMs": 4838,
-          "trackOffsetMs": 30706
+          "text": "Jagged snowy peaks drift past in haze. Text reads: a Blender Institute production.",
+          "audioDurationMs": 5905,
+          "trackOffsetMs": 15428
         },
         {
           "id": "sintel-0002",
           "gap": {
-            "startMs": 38345,
+            "startMs": 23067,
             "durationMs": 7639
           },
-          "text": "She turns, face bare to the wind, and looks back toward the ice-crusted rocks behind her.",
-          "audioDurationMs": 5188,
-          "trackOffsetMs": 38345
+          "text": "Credits fade. Wind-carved ice ridges and dark bare rock slide past beneath drifting mist.",
+          "audioDurationMs": 5805,
+          "trackOffsetMs": 23067
         },
         {
           "id": "sintel-0003",
           "gap": {
-            "startMs": 45984,
+            "startMs": 30706,
             "durationMs": 7639
           },
-          "text": "A bald man strides toward her through the snow as she raises a hand.",
-          "audioDurationMs": 3387,
-          "trackOffsetMs": 45984
+          "text": "A lone figure with a staff trudges across the snowfield, leaving a long trail of footprints.",
+          "audioDurationMs": 5113,
+          "trackOffsetMs": 30706
         },
         {
           "id": "sintel-0004",
           "gap": {
-            "startMs": 53623,
+            "startMs": 38345,
             "durationMs": 7639
           },
-          "text": "He hauls her up by the arm; she grips a spiked axe, teeth clenched.",
-          "audioDurationMs": 4466,
-          "trackOffsetMs": 53623
+          "text": "The figure turns, lowering a scarf from a young face, red hair whipping in the wind.",
+          "audioDurationMs": 4725,
+          "trackOffsetMs": 38345
         },
         {
           "id": "sintel-0005",
           "gap": {
-            "startMs": 61262,
+            "startMs": 45984,
             "durationMs": 7639
           },
-          "text": "He stands over her, drawing a blade, a gold medallion swinging at his chest.",
-          "audioDurationMs": 4547,
-          "trackOffsetMs": 61262
+          "text": "Two cloaked figures grapple on the snow; a bald man strides toward them through the mist.",
+          "audioDurationMs": 4850,
+          "trackOffsetMs": 45984
         },
         {
           "id": "sintel-0006",
           "gap": {
-            "startMs": 68901,
+            "startMs": 53623,
             "durationMs": 7639
           },
-          "text": "A snarling man bares his teeth, then pins her in the snow, wrenching her weapon away.",
-          "audioDurationMs": 4919,
-          "trackOffsetMs": 68901
+          "text": "A gloved hand yanks the red-haired girl up by her collar as she grips a spiked axe.",
+          "audioDurationMs": 4538,
+          "trackOffsetMs": 53623
         },
         {
           "id": "sintel-0007",
           "gap": {
-            "startMs": 76540,
+            "startMs": 61262,
             "durationMs": 7639
           },
-          "text": "She lies on her back in the snow, eyes shut, a staff pressed across her throat.",
-          "audioDurationMs": 4689,
-          "trackOffsetMs": 76540
+          "text": "The bald man draws a knife and grins down at her, snowy peaks behind him.",
+          "audioDurationMs": 4288,
+          "trackOffsetMs": 61262
         },
         {
           "id": "sintel-0008",
           "gap": {
-            "startMs": 84179,
+            "startMs": 68901,
             "durationMs": 7639
           },
-          "text": "Far below, a lone lit cave mouth glows amber in a vast snowbound mountain basin.",
-          "audioDurationMs": 4785,
-          "trackOffsetMs": 84179
+          "text": "He bares his teeth, snarling close. On the snow he pins her, wrenching the spiked staff from her hands.",
+          "audioDurationMs": 6605,
+          "trackOffsetMs": 68901
         },
         {
           "id": "sintel-0009",
           "gap": {
-            "startMs": 91818,
+            "startMs": 76540,
             "durationMs": 7639
           },
-          "text": "A lone cloaked figure trudges across the snowfield below icy peaks. Title appears: SINTEL.",
-          "audioDurationMs": 5895,
-          "trackOffsetMs": 91818
+          "text": "She lies pinned in the snow, a staff pressed across her throat, eyes shut tight.",
+          "audioDurationMs": 4663,
+          "trackOffsetMs": 76540
         },
         {
           "id": "sintel-0010",
           "gap": {
-            "startMs": 99457,
-            "durationMs": 7643
+            "startMs": 84179,
+            "durationMs": 7639
           },
-          "text": "The title fades. The two bodies lie motionless, tiny specks on the vast white plain.",
-          "audioDurationMs": 5271,
-          "trackOffsetMs": 99457
+          "text": "Far below, a lone lit cabin window glows orange on a vast snowbound mountainside.",
+          "audioDurationMs": 4975,
+          "trackOffsetMs": 84179
         },
         {
           "id": "sintel-0011",
           "gap": {
-            "startMs": 145150,
-            "durationMs": 3550
+            "startMs": 91818,
+            "durationMs": 7639
           },
-          "text": "Red-haired young woman, lips parted, lowers her eyes.",
-          "audioDurationMs": 3142,
-          "trackOffsetMs": 145150
+          "text": "A lone figure with a staff trudges across the snowfield. Title appears: SINTEL, beneath a tree emblem.",
+          "audioDurationMs": 6780,
+          "trackOffsetMs": 91818
         },
         {
           "id": "sintel-0012",
           "gap": {
-            "startMs": 156020,
-            "durationMs": 7297
+            "startMs": 99457,
+            "durationMs": 7643
           },
-          "text": "A sprawling walled city of rooftops in golden haze; a red-haired girl runs through rubble-strewn alleys.",
-          "audioDurationMs": 5360,
-          "trackOffsetMs": 156020
+          "text": "The title fades. Two tiny figures lie motionless on the snow beneath the towering ice crags.",
+          "audioDurationMs": 5643,
+          "trackOffsetMs": 99457
         },
         {
           "id": "sintel-0013",
           "gap": {
-            "startMs": 163317,
-            "durationMs": 7297
+            "startMs": 145150,
+            "durationMs": 3550
           },
-          "text": "A large hand grips her hair, yanking her head back; she stares up, wide-eyed.",
-          "audioDurationMs": 4850,
-          "trackOffsetMs": 163317
+          "text": "Her eyes lower, mouth slightly open.",
+          "audioDurationMs": 2550,
+          "trackOffsetMs": 145150
         },
         {
           "id": "sintel-0014",
           "gap": {
-            "startMs": 170614,
+            "startMs": 156020,
             "durationMs": 7297
           },
-          "text": "She twists free of the gripping hand and turns away into the ruined street.",
-          "audioDurationMs": 3586,
-          "trackOffsetMs": 170614
+          "text": "A vast walled city of packed rooftops. Below, a red-haired girl hauls a plank through a rubble-strewn alley.",
+          "audioDurationMs": 6493,
+          "trackOffsetMs": 156020
         },
         {
           "id": "sintel-0015",
           "gap": {
-            "startMs": 177911,
+            "startMs": 163317,
             "durationMs": 7297
           },
-          "text": "She runs alone down a narrow alley between crumbling houses, leaping over scattered stone blocks.",
-          "audioDurationMs": 5374,
-          "trackOffsetMs": 177911
+          "text": "She hoists the plank overhead, looking up with wide eyes.",
+          "audioDurationMs": 3325,
+          "trackOffsetMs": 163317
         },
         {
           "id": "sintel-0016",
           "gap": {
-            "startMs": 185208,
+            "startMs": 170614,
             "durationMs": 7297
           },
-          "text": "A small winged creature lies on a tiled roof beside a dark red pool.",
-          "audioDurationMs": 3735,
-          "trackOffsetMs": 185208
+          "text": "She hands the plank to a cloaked figure, then turns away among the half-built timber frames.",
+          "audioDurationMs": 4850,
+          "trackOffsetMs": 170614
         },
         {
           "id": "sintel-0017",
           "gap": {
-            "startMs": 192505,
+            "startMs": 177911,
             "durationMs": 7297
           },
-          "text": "She kneels on the cobbles, staring at the small bleeding creature in the blood pool.",
-          "audioDurationMs": 4398,
-          "trackOffsetMs": 192505
+          "text": "She faces the sunlit timber buildings, then runs off down the rubble-strewn alley between high stone walls.",
+          "audioDurationMs": 5850,
+          "trackOffsetMs": 177911
         },
         {
           "id": "sintel-0018",
           "gap": {
-            "startMs": 199802,
-            "durationMs": 7298
+            "startMs": 185208,
+            "durationMs": 7297
           },
-          "text": "She reaches out a hand; the creature lifts its head toward her fingers.",
-          "audioDurationMs": 3783,
-          "trackOffsetMs": 199802
+          "text": "A small winged creature lies on the tiled roof, blood pooling beneath it. The girl watches.",
+          "audioDurationMs": 5330,
+          "trackOffsetMs": 185208
         },
         {
           "id": "sintel-0019",
           "gap": {
-            "startMs": 213650,
-            "durationMs": 7225
+            "startMs": 192505,
+            "durationMs": 7297
           },
-          "text": "In a shadowy ruin she cradles the creature on a mat, tending a bloodied shoulder wound.",
-          "audioDurationMs": 4862,
-          "trackOffsetMs": 213650
+          "text": "She kneels close on the tiles, reaching a hand toward the bleeding creature as it stirs.",
+          "audioDurationMs": 4450,
+          "trackOffsetMs": 192505
         },
         {
           "id": "sintel-0020",
           "gap": {
-            "startMs": 220875,
-            "durationMs": 7225
+            "startMs": 199802,
+            "durationMs": 7298
           },
-          "text": "She smiles down at the creature, then sets a worn stone bowl on the mat.",
-          "audioDurationMs": 4050,
-          "trackOffsetMs": 220875
+          "text": "The creature lifts its head toward her outstretched fingers, its torn wing smeared red beneath it.",
+          "audioDurationMs": 5100,
+          "trackOffsetMs": 199802
         },
         {
           "id": "sintel-0021",
           "gap": {
-            "startMs": 232400,
-            "durationMs": 5933
+            "startMs": 213650,
+            "durationMs": 7225
           },
-          "text": "She moves away into shadow, leaving the creature resting on the lit mat.",
-          "audioDurationMs": 3876,
-          "trackOffsetMs": 232400
+          "text": "Inside a ruined room, she cradles the creature on her lap, hands pressed to its wound.",
+          "audioDurationMs": 5013,
+          "trackOffsetMs": 213650
         },
         {
           "id": "sintel-0022",
           "gap": {
-            "startMs": 238333,
-            "durationMs": 5933
+            "startMs": 220875,
+            "durationMs": 7225
           },
-          "text": "The creature curls up beneath a warm torch glow, eyes closing.",
-          "audioDurationMs": 3681,
-          "trackOffsetMs": 238333
+          "text": "She smiles down at the lizard-like creature. A hand sets an empty stone bowl on cloth.",
+          "audioDurationMs": 5268,
+          "trackOffsetMs": 220875
         },
         {
           "id": "sintel-0023",
           "gap": {
-            "startMs": 244266,
-            "durationMs": 5934
+            "startMs": 232400,
+            "durationMs": 5933
           },
-          "text": "She lies beside the small dragon, their heads nearly touching on the blanket.",
-          "audioDurationMs": 4201,
-          "trackOffsetMs": 244266
+          "text": "In a dark cluttered room, the creature lies still on a low bed.",
+          "audioDurationMs": 3425,
+          "trackOffsetMs": 232400
         },
         {
           "id": "sintel-0024",
           "gap": {
-            "startMs": 254000,
-            "durationMs": 5550
+            "startMs": 238333,
+            "durationMs": 5933
           },
-          "text": "She leaps from the ledge; the dragon soars above market carts and awnings.",
-          "audioDurationMs": 3934,
-          "trackOffsetMs": 254000
+          "text": "A glowing lantern swings above, light spilling over the sleeping creature below.",
+          "audioDurationMs": 4325,
+          "trackOffsetMs": 238333
         },
         {
           "id": "sintel-0025",
           "gap": {
-            "startMs": 259550,
-            "durationMs": 5550
+            "startMs": 244266,
+            "durationMs": 5934
           },
-          "text": "Two girls chase through the market as a bystander watches from the stalls.",
-          "audioDurationMs": 3703,
-          "trackOffsetMs": 259550
+          "text": "The creature nuzzles into her hands and settles against her side.",
+          "audioDurationMs": 3363,
+          "trackOffsetMs": 244266
         },
         {
           "id": "sintel-0026",
           "gap": {
-            "startMs": 268400,
-            "durationMs": 7090
+            "startMs": 254000,
+            "durationMs": 5550
           },
-          "text": "The red-haired girl stops in the market, lips parted, staring ahead.",
-          "audioDurationMs": 3983,
-          "trackOffsetMs": 268400
+          "text": "She vaults over crates; the creature leaps across rooftops and tangled ropes above.",
+          "audioDurationMs": 4850,
+          "trackOffsetMs": 254000
         },
         {
           "id": "sintel-0027",
           "gap": {
-            "startMs": 275490,
-            "durationMs": 7090
+            "startMs": 259550,
+            "durationMs": 5550
           },
-          "text": "The little dragon flies to a timber beam and peers over it, smoke puffing.",
-          "audioDurationMs": 4076,
-          "trackOffsetMs": 275490
+          "text": "She races through the market past vendors, the creature bounding behind her.",
+          "audioDurationMs": 4125,
+          "trackOffsetMs": 259550
         },
         {
           "id": "sintel-0028",
           "gap": {
-            "startMs": 282580,
+            "startMs": 268400,
             "durationMs": 7090
           },
-          "text": "Perched on the beam, the dragon watches a V-formation of birds drift across the sky.",
-          "audioDurationMs": 4770,
-          "trackOffsetMs": 282580
+          "text": "She stops in the empty market, scanning around her, lips parted, breathing hard.",
+          "audioDurationMs": 4863,
+          "trackOffsetMs": 268400
         },
         {
           "id": "sintel-0029",
           "gap": {
-            "startMs": 289670,
+            "startMs": 275490,
             "durationMs": 7090
           },
-          "text": "She climbs stone steps toward a ruined temple, a figure waiting on the terrace above.",
-          "audioDurationMs": 4654,
-          "trackOffsetMs": 289670
+          "text": "The small dragon flutters down behind a wooden beam, peering over it, smoke curling from its nostrils.",
+          "audioDurationMs": 5738,
+          "trackOffsetMs": 275490
         },
         {
           "id": "sintel-0030",
           "gap": {
-            "startMs": 296760,
+            "startMs": 282580,
             "durationMs": 7090
           },
-          "text": "The dragon swoops off the beam over rooftops; below, she stands alone on the terrace.",
-          "audioDurationMs": 5028,
-          "trackOffsetMs": 296760
+          "text": "Perched on a rooftop beam, it watches a V of birds crossing the sky.",
+          "audioDurationMs": 3963,
+          "trackOffsetMs": 282580
         },
         {
           "id": "sintel-0031",
           "gap": {
-            "startMs": 307650,
-            "durationMs": 7737
+            "startMs": 289670,
+            "durationMs": 7090
           },
-          "text": "She watches the dragon circle overhead against the sunset, then clasps her hands, grinning.",
-          "audioDurationMs": 5281,
-          "trackOffsetMs": 307650
+          "text": "Far below, the ruined city sprawls. She climbs broken stone steps toward a pillared temple.",
+          "audioDurationMs": 5905,
+          "trackOffsetMs": 289670
         },
         {
           "id": "sintel-0032",
           "gap": {
-            "startMs": 315387,
-            "durationMs": 7737
+            "startMs": 296760,
+            "durationMs": 7090
           },
-          "text": "A huge winged creature glides toward the tiny red dragon. Below, her eyes widen, mouth open.",
-          "audioDurationMs": 5860,
-          "trackOffsetMs": 315387
+          "text": "The dragon swoops off the rooftop toward the sunset; she stands alone on the vast stone terrace.",
+          "audioDurationMs": 5225,
+          "trackOffsetMs": 296760
         },
         {
           "id": "sintel-0033",
           "gap": {
-            "startMs": 323124,
+            "startMs": 307650,
             "durationMs": 7737
           },
-          "text": "The horned dragon dives from the clouds and sweeps low past the boy on the platform.",
-          "audioDurationMs": 4296,
-          "trackOffsetMs": 323124
+          "text": "The dragon circles back toward her. She clasps her hands to her chest, grinning up at it.",
+          "audioDurationMs": 5218,
+          "trackOffsetMs": 307650
         },
         {
           "id": "sintel-0034",
           "gap": {
-            "startMs": 330861,
-            "durationMs": 7739
+            "startMs": 315387,
+            "durationMs": 7737
           },
-          "text": "The great beast swoops close over her head, tail sweeping past her face.",
-          "audioDurationMs": 4122,
-          "trackOffsetMs": 330861
+          "text": "A huge winged creature glides in above the small red dragon. The girl stares, mouth open.",
+          "audioDurationMs": 5768,
+          "trackOffsetMs": 315387
         },
         {
           "id": "sintel-0035",
           "gap": {
-            "startMs": 342150,
-            "durationMs": 7965
+            "startMs": 323124,
+            "durationMs": 7737
           },
-          "text": "She stands on the rooftop watching a winged shape glide past the sun above the distant tower.",
-          "audioDurationMs": 4584,
-          "trackOffsetMs": 342150
+          "text": "The horned dragon dives headfirst from the sky, sweeping low past her across the terrace.",
+          "audioDurationMs": 5000,
+          "trackOffsetMs": 323124
         },
         {
           "id": "sintel-0036",
           "gap": {
-            "startMs": 350115,
-            "durationMs": 7965
+            "startMs": 330861,
+            "durationMs": 7739
           },
-          "text": "Her brow furrows, a yellow eye narrowing. Boots pound across dusty ground as she runs.",
-          "audioDurationMs": 5115,
-          "trackOffsetMs": 350115
+          "text": "She reaches up as the winged creature swings past; its tail whips close to her face.",
+          "audioDurationMs": 4788,
+          "trackOffsetMs": 330861
         },
         {
           "id": "sintel-0037",
           "gap": {
-            "startMs": 358080,
+            "startMs": 342150,
             "durationMs": 7965
           },
-          "text": "A vast shape looms over a plain of stumps. A young man crouches on a ridge, watching.",
-          "audioDurationMs": 5163,
-          "trackOffsetMs": 358080
+          "text": "She turns toward the setting sun, the winged shape shrinking into the distance above the city.",
+          "audioDurationMs": 4850,
+          "trackOffsetMs": 342150
         },
         {
           "id": "sintel-0038",
           "gap": {
-            "startMs": 366045,
+            "startMs": 350115,
             "durationMs": 7965
           },
-          "text": "A huge pale moon fills the night sky; a lone figure stands small on the ridge.",
-          "audioDurationMs": 4490,
-          "trackOffsetMs": 366045
+          "text": "Her eyes narrow, one glowing amber. She sprints off across the dusty ground, boots pounding.",
+          "audioDurationMs": 6093,
+          "trackOffsetMs": 350115
         },
         {
           "id": "sintel-0039",
           "gap": {
-            "startMs": 374010,
+            "startMs": 358080,
             "durationMs": 7965
           },
-          "text": "A tiny figure crosses endless sand dunes, footprints trailing behind. A giant translucent hand fades into view overhead.",
-          "audioDurationMs": 7485,
-          "trackOffsetMs": 374010
+          "text": "She runs across a plain of broken stumps at dusk, crumbling pillars and spiked wall behind her.",
+          "audioDurationMs": 5338,
+          "trackOffsetMs": 358080
         },
         {
           "id": "sintel-0040",
           "gap": {
-            "startMs": 381975,
+            "startMs": 366045,
             "durationMs": 7965
           },
-          "text": "Seen from above, a red-haired woman races through dense green bamboo, then ducks beneath a leaning stalk.",
-          "audioDurationMs": 5715,
-          "trackOffsetMs": 381975
+          "text": "A boy's face fills the frame; behind him a small figure walks a ridge beneath a huge pale moon.",
+          "audioDurationMs": 5388,
+          "trackOffsetMs": 366045
         },
         {
           "id": "sintel-0041",
           "gap": {
-            "startMs": 389940,
+            "startMs": 374010,
             "durationMs": 7965
           },
-          "text": "She falls among rust-coloured rocks as a fanged creature lunges from the cliff face above her.",
-          "audioDurationMs": 4828,
-          "trackOffsetMs": 389940
+          "text": "A tiny figure trudges across endless golden dunes, leaving a trail of footprints. A vast ghostly hand looms overhead.",
+          "audioDurationMs": 7405,
+          "trackOffsetMs": 374010
         },
         {
           "id": "sintel-0042",
           "gap": {
-            "startMs": 397905,
+            "startMs": 381975,
             "durationMs": 7965
           },
-          "text": "A dark-haired man grips a staff, climbing a misty rock face. He grins back over his shoulder.",
-          "audioDurationMs": 5569,
-          "trackOffsetMs": 397905
+          "text": "She climbs through dense green bamboo, red-haired, pushing past stalks on a steep slope.",
+          "audioDurationMs": 5163,
+          "trackOffsetMs": 381975
         },
         {
           "id": "sintel-0043",
           "gap": {
-            "startMs": 405870,
+            "startMs": 389940,
             "durationMs": 7965
           },
-          "text": "Mist swallows him as he hauls himself higher, knuckles tight on the carved staff.",
-          "audioDurationMs": 4404,
-          "trackOffsetMs": 405870
+          "text": "She falls backward onto rust-colored rocks as a fanged creature lunges down at her from the cliff.",
+          "audioDurationMs": 4988,
+          "trackOffsetMs": 389940
         },
         {
           "id": "sintel-0044",
           "gap": {
-            "startMs": 413835,
+            "startMs": 397905,
             "durationMs": 7965
           },
-          "text": "Snow-laden peaks and jagged black rock stretch into white haze, no figure in sight.",
-          "audioDurationMs": 4727,
-          "trackOffsetMs": 413835
+          "text": "A man with a long staff scales misty rocks, then turns, grinning, reaching toward something below.",
+          "audioDurationMs": 5700,
+          "trackOffsetMs": 397905
         },
         {
           "id": "sintel-0045",
           "gap": {
-            "startMs": 421800,
+            "startMs": 405870,
             "durationMs": 7965
           },
-          "text": "He trudges up a snowfield in whiteout, staff shouldered, past half-buried boulders and an ice wall.",
-          "audioDurationMs": 5627,
-          "trackOffsetMs": 421800
+          "text": "A pale, hooded figure grips a carved staff on a fog-shrouded cliff, then blurs into mist.",
+          "audioDurationMs": 5600,
+          "trackOffsetMs": 405870
         },
         {
           "id": "sintel-0046",
           "gap": {
-            "startMs": 429765,
+            "startMs": 413835,
             "durationMs": 7965
           },
-          "text": "A lone track of footprints trails behind him across the blank snow toward the overhanging ice.",
-          "audioDurationMs": 4989,
-          "trackOffsetMs": 429765
+          "text": "Snow-covered black peaks under pale sky; a lone figure scrambles up the jagged rocks far below.",
+          "audioDurationMs": 5563,
+          "trackOffsetMs": 413835
         },
         {
           "id": "sintel-0047",
           "gap": {
-            "startMs": 437730,
-            "durationMs": 7970
+            "startMs": 421800,
+            "durationMs": 7965
           },
-          "text": "Blackness. A faint glow picks out a woman's face at the edge of the dark.",
-          "audioDurationMs": 3917,
-          "trackOffsetMs": 437730
+          "text": "A hooded figure in fog, face hidden, then a lone climber hauls a long pole across deep snow.",
+          "audioDurationMs": 5725,
+          "trackOffsetMs": 421800
         },
         {
           "id": "sintel-0048",
           "gap": {
-            "startMs": 447650,
-            "durationMs": 5000
+            "startMs": 429765,
+            "durationMs": 7965
           },
-          "text": "She looks down. Opposite, a bearded old man holds a pipe.",
-          "audioDurationMs": 3644,
-          "trackOffsetMs": 447650
+          "text": "Far below, the tiny figure trudges across a vast white slope, dragging a trail of footprints.",
+          "audioDurationMs": 5550,
+          "trackOffsetMs": 429765
         },
         {
           "id": "sintel-0049",
           "gap": {
-            "startMs": 464150,
-            "durationMs": 7775
+            "startMs": 437730,
+            "durationMs": 7970
           },
-          "text": "The old man smiles faintly. She closes her eyes, head lowered in the dim light.",
-          "audioDurationMs": 4689,
-          "trackOffsetMs": 464150
+          "text": "Darkness swallows the screen; only a faint, dimly lit face lingers at the far left edge.",
+          "audioDurationMs": 5313,
+          "trackOffsetMs": 437730
         },
         {
           "id": "sintel-0050",
           "gap": {
-            "startMs": 471925,
-            "durationMs": 7775
+            "startMs": 447650,
+            "durationMs": 5000
           },
-          "text": "Fingers hold a carved bronze medallion: a spreading tree ringed by runes. It blurs into living branches.",
-          "audioDurationMs": 6062,
-          "trackOffsetMs": 471925
+          "text": "She lowers her eyes; a bearded elder watches, holding a staff.",
+          "audioDurationMs": 4100,
+          "trackOffsetMs": 447650
         },
         {
           "id": "sintel-0051",
           "gap": {
-            "startMs": 479700,
+            "startMs": 464150,
             "durationMs": 7775
           },
-          "text": "She looks up, mouth open. Above her, a vast gnarled tree looms against pale sky.",
-          "audioDurationMs": 5153,
-          "trackOffsetMs": 479700
+          "text": "The bearded elder leans in, smiling faintly. She closes her eyes, head bowed in the dim light.",
+          "audioDurationMs": 6255,
+          "trackOffsetMs": 464150
         },
         {
           "id": "sintel-0052",
           "gap": {
-            "startMs": 487475,
+            "startMs": 471925,
             "durationMs": 7775
           },
-          "text": "A tiny figure in red stands alone at the cave mouth, full moon beyond.",
-          "audioDurationMs": 4141,
-          "trackOffsetMs": 487475
+          "text": "Fingers hold an engraved bronze medallion showing a great tree ringed with runes; it fills the screen, glowing.",
+          "audioDurationMs": 6325,
+          "trackOffsetMs": 471925
         },
         {
           "id": "sintel-0053",
           "gap": {
-            "startMs": 495250,
+            "startMs": 479700,
             "durationMs": 7775
           },
-          "text": "Deep in a dark cave, small glowing blue-white crystals cluster along the rock walls.",
-          "audioDurationMs": 4682,
-          "trackOffsetMs": 495250
+          "text": "She stares upward, lips parted. Above her looms a colossal gnarled tree against pale sky.",
+          "audioDurationMs": 5918,
+          "trackOffsetMs": 479700
         },
         {
           "id": "sintel-0054",
           "gap": {
-            "startMs": 503025,
+            "startMs": 487475,
             "durationMs": 7775
           },
-          "text": "A scaled creature crouches over a torn body on the cave floor, feeding.",
-          "audioDurationMs": 4130,
-          "trackOffsetMs": 503025
+          "text": "A tiny red-cloaked figure stands alone at the mouth of a vast cave, full moon beyond.",
+          "audioDurationMs": 4888,
+          "trackOffsetMs": 487475
         },
         {
           "id": "sintel-0055",
           "gap": {
-            "startMs": 510800,
+            "startMs": 495250,
             "durationMs": 7775
           },
-          "text": "A huge stone arch spans the cavern, glowing crystals scattered far below on the floor.",
-          "audioDurationMs": 4815,
-          "trackOffsetMs": 510800
+          "text": "In darkness, glowing blue-white crystal clusters line a rock ledge; a small figure moves among them.",
+          "audioDurationMs": 5788,
+          "trackOffsetMs": 495250
         },
         {
           "id": "sintel-0056",
           "gap": {
-            "startMs": 518575,
+            "startMs": 503025,
             "durationMs": 7775
           },
-          "text": "The spiked creature lifts its head from the body, turning toward the dark.",
-          "audioDurationMs": 3820,
-          "trackOffsetMs": 518575
+          "text": "Deep in the cave, a scaled creature crouches over a torn body, feeding.",
+          "audioDurationMs": 4350,
+          "trackOffsetMs": 503025
         },
         {
           "id": "sintel-0057",
           "gap": {
-            "startMs": 526350,
+            "startMs": 510800,
             "durationMs": 7775
           },
-          "text": "A red-haired woman crouches on a ledge with a spear, then creeps low across the rock.",
-          "audioDurationMs": 4559,
-          "trackOffsetMs": 526350
+          "text": "A huge stone arch spans the cavern. Glowing crystals dot the floor far below.",
+          "audioDurationMs": 5105,
+          "trackOffsetMs": 510800
         },
         {
           "id": "sintel-0058",
           "gap": {
-            "startMs": 534125,
+            "startMs": 518575,
             "durationMs": 7775
           },
-          "text": "She peers over the ledge toward the creature, then turns, face lit pale, eyes wide.",
-          "audioDurationMs": 5153,
-          "trackOffsetMs": 534125
+          "text": "The creature lifts its spined head from the body, turning toward the rocks.",
+          "audioDurationMs": 3638,
+          "trackOffsetMs": 518575
         },
         {
           "id": "sintel-0059",
           "gap": {
-            "startMs": 541900,
+            "startMs": 526350,
             "durationMs": 7775
           },
-          "text": "The horned creature rears up, blade-like limbs spread, as she lunges in with her spear.",
-          "audioDurationMs": 4633,
-          "trackOffsetMs": 541900
+          "text": "A red-haired woman in armour crouches on a rock, spear in hand, watching below.",
+          "audioDurationMs": 4775,
+          "trackOffsetMs": 526350
         },
         {
           "id": "sintel-0060",
           "gap": {
-            "startMs": 549675,
+            "startMs": 534125,
             "durationMs": 7775
           },
-          "text": "A body lies in the dark cavern. The woman edges behind a crystal-studded rock, gripping it.",
-          "audioDurationMs": 5105,
-          "trackOffsetMs": 549675
+          "text": "She crawls to the ledge's edge, then turns and looks back over her shoulder.",
+          "audioDurationMs": 4050,
+          "trackOffsetMs": 534125
         },
         {
           "id": "sintel-0061",
           "gap": {
-            "startMs": 559650,
-            "durationMs": 7725
+            "startMs": 541900,
+            "durationMs": 7775
           },
-          "text": "Her mouth falls open. She throws herself aside as a burst of fire erupts.",
-          "audioDurationMs": 4524,
-          "trackOffsetMs": 559650
+          "text": "Her eyes widen, mouth open. She lunges down, spear raised, as the horned creature rears toward her.",
+          "audioDurationMs": 6968,
+          "trackOffsetMs": 541900
         },
         {
           "id": "sintel-0062",
           "gap": {
-            "startMs": 567375,
-            "durationMs": 7725
+            "startMs": 549675,
+            "durationMs": 7775
           },
-          "text": "A hand grips the creature's armoured flank; it twists away, scales sliding past in the dark.",
-          "audioDurationMs": 5302,
-          "trackOffsetMs": 567375
+          "text": "In the dark cavern, bodies lie scattered. She presses against a rock wall, gripping a crystal.",
+          "audioDurationMs": 5680,
+          "trackOffsetMs": 549675
         },
         {
           "id": "sintel-0063",
           "gap": {
-            "startMs": 575100,
+            "startMs": 559650,
             "durationMs": 7725
           },
-          "text": "She lies sprawled on the rocks, dirt-streaked, dragging herself forward on her hands.",
-          "audioDurationMs": 4944,
-          "trackOffsetMs": 575100
+          "text": "She leaps from the ledge toward a burst of golden fire below, spear trailing behind her.",
+          "audioDurationMs": 4925,
+          "trackOffsetMs": 559650
         },
         {
           "id": "sintel-0064",
           "gap": {
-            "startMs": 582825,
+            "startMs": 567375,
             "durationMs": 7725
           },
-          "text": "She faces the winged beast, spear raised. Then she lies crumpled among glowing crystals.",
-          "audioDurationMs": 5211,
-          "trackOffsetMs": 582825
+          "text": "A huge scaled hide fills the cave, clawed limbs shifting as she drops behind it.",
+          "audioDurationMs": 4563,
+          "trackOffsetMs": 567375
         },
         {
           "id": "sintel-0065",
           "gap": {
-            "startMs": 590550,
+            "startMs": 575100,
             "durationMs": 7725
           },
-          "text": "She slumps, hand open on the stone. A horned, bearded figure rises from the darkness above her.",
-          "audioDurationMs": 5826,
-          "trackOffsetMs": 590550
+          "text": "Dirt-smeared, she drags herself across the rocky ground, breathing hard, eyes fixed ahead.",
+          "audioDurationMs": 5550,
+          "trackOffsetMs": 575100
         },
         {
           "id": "sintel-0066",
           "gap": {
-            "startMs": 598275,
+            "startMs": 582825,
             "durationMs": 7725
           },
-          "text": "A scaled snout lowers to the red-haired woman's face. Its dark eye fills the frame.",
-          "audioDurationMs": 4559,
-          "trackOffsetMs": 598275
+          "text": "Spear raised, she faces the winged beast looming over her. It swats her sprawling across the rocks.",
+          "audioDurationMs": 6093,
+          "trackOffsetMs": 582825
         },
         {
           "id": "sintel-0067",
           "gap": {
-            "startMs": 606000,
+            "startMs": 590550,
             "durationMs": 7725
           },
-          "text": "The winged beast lifts away, leaving her small body lying among the glowing crystals below.",
-          "audioDurationMs": 4865,
-          "trackOffsetMs": 606000
+          "text": "She lies in the dark, a faint glow in her open hand. The horned beast rises, watching.",
+          "audioDurationMs": 5580,
+          "trackOffsetMs": 590550
         },
         {
           "id": "sintel-0068",
           "gap": {
-            "startMs": 613725,
+            "startMs": 598275,
             "durationMs": 7725
           },
-          "text": "The dragon's amber eye narrows. The red-haired woman looks up, mouth open, breath shaking.",
-          "audioDurationMs": 5306,
-          "trackOffsetMs": 613725
+          "text": "The beast lowers its horned head over her still body. Its dark eye fixes on her.",
+          "audioDurationMs": 4730,
+          "trackOffsetMs": 598275
         },
         {
           "id": "sintel-0069",
           "gap": {
-            "startMs": 624150,
-            "durationMs": 1900
+            "startMs": 606000,
+            "durationMs": 7725
           },
-          "text": "The dragon's head lowers.",
-          "audioDurationMs": 1336,
-          "trackOffsetMs": 624150
+          "text": "The beast spreads vast wings above her. She lies small below, glowing lights scattered on the rock.",
+          "audioDurationMs": 5868,
+          "trackOffsetMs": 606000
         },
         {
           "id": "sintel-0070",
           "gap": {
-            "startMs": 629950,
-            "durationMs": 7816
+            "startMs": 613725,
+            "durationMs": 7725
           },
-          "text": "A dark pool of blood spreads slowly across the cold stone floor.",
-          "audioDurationMs": 3480,
-          "trackOffsetMs": 629950
-        },
-        {
-          "id": "sintel-0071",
-          "gap": {
-            "startMs": 637766,
-            "durationMs": 7816
-          },
-          "text": "She raises a trembling gloved hand toward her face, eyes wide, lit by dawn.",
-          "audioDurationMs": 4665,
-          "trackOffsetMs": 637766
+          "text": "The scaled face fills the dark, amber eye narrowed. The girl looks up, lips parted.",
+          "audioDurationMs": 5355,
+          "trackOffsetMs": 613725
         },
         {
           "id": "sintel-0072",
           "gap": {
-            "startMs": 645582,
+            "startMs": 629950,
             "durationMs": 7816
           },
-          "text": "She turns her hand over, staring at her fingers, mouth slack. Her bare shoulder is bruised.",
-          "audioDurationMs": 5710,
-          "trackOffsetMs": 645582
+          "text": "A pool of dark red blood spreads slowly across the stone floor.",
+          "audioDurationMs": 3725,
+          "trackOffsetMs": 629950
         },
         {
           "id": "sintel-0073",
           "gap": {
-            "startMs": 653398,
+            "startMs": 637766,
             "durationMs": 7816
           },
-          "text": "She draws a weapon, gripping it in both hands. The huge scaled head lies before her.",
-          "audioDurationMs": 4863,
-          "trackOffsetMs": 653398
+          "text": "The girl's face, streaked with dirt and tears, lifts a bandaged hand toward her mouth.",
+          "audioDurationMs": 4850,
+          "trackOffsetMs": 637766
         },
         {
           "id": "sintel-0074",
           "gap": {
-            "startMs": 661214,
+            "startMs": 645582,
             "durationMs": 7816
           },
-          "text": "She stares upward in the dark, then climbs the rock face, reaching for a handhold.",
-          "audioDurationMs": 4851,
-          "trackOffsetMs": 661214
+          "text": "She stares at her own fingers, trembling, bruises dark along her bare shoulder.",
+          "audioDurationMs": 4875,
+          "trackOffsetMs": 645582
         },
         {
           "id": "sintel-0075",
           "gap": {
-            "startMs": 669030,
+            "startMs": 653398,
             "durationMs": 7816
           },
-          "text": "She stands over the dead beast, blade lowered. Her face, streaked with dirt, stares down, lips parted.",
-          "audioDurationMs": 6662,
-          "trackOffsetMs": 669030
+          "text": "She raises a bow, arrow nocked, aimed at the huge scaled head resting on the stone.",
+          "audioDurationMs": 4788,
+          "trackOffsetMs": 653398
         },
         {
           "id": "sintel-0076",
           "gap": {
-            "startMs": 676846,
+            "startMs": 661214,
             "durationMs": 7816
           },
-          "text": "She stands small at the mouth of a vast cavern, pale light flooding in beyond.",
-          "audioDurationMs": 4294,
-          "trackOffsetMs": 676846
+          "text": "She gazes upward in a dark cavern, then scrambles up the rock face on all fours.",
+          "audioDurationMs": 4788,
+          "trackOffsetMs": 661214
         },
         {
           "id": "sintel-0077",
           "gap": {
-            "startMs": 684662,
+            "startMs": 669030,
             "durationMs": 7816
           },
-          "text": "Outside, she sits alone on a vast ridge beside a towering tree, mountains fading into haze.",
-          "audioDurationMs": 5475,
-          "trackOffsetMs": 684662
+          "text": "She stands over the dead beast, blade in hand, then looks up, face slack and dirt-smeared.",
+          "audioDurationMs": 5300,
+          "trackOffsetMs": 669030
         },
         {
           "id": "sintel-0078",
           "gap": {
-            "startMs": 692478,
+            "startMs": 676846,
             "durationMs": 7816
           },
-          "text": "She sits at the cliff edge, legs dangling, head bowed over hazy peaks and drifting specks.",
-          "audioDurationMs": 5281,
-          "trackOffsetMs": 692478
+          "text": "She crouches on a ledge in a vast cave, light pouring in ahead. Everything blurs to darkness.",
+          "audioDurationMs": 5693,
+          "trackOffsetMs": 676846
         },
         {
           "id": "sintel-0079",
           "gap": {
-            "startMs": 700294,
+            "startMs": 684662,
             "durationMs": 7816
           },
-          "text": "Close on her lowered head, hands covering her face, a bruise dark on her shoulder.",
-          "audioDurationMs": 4712,
-          "trackOffsetMs": 700294
+          "text": "Outside, she sits alone on a barren ridge beneath a colossal tree, misty mountains stretching to the horizon.",
+          "audioDurationMs": 6238,
+          "trackOffsetMs": 684662
         },
         {
           "id": "sintel-0080",
           "gap": {
-            "startMs": 708110,
+            "startMs": 700294,
             "durationMs": 7816
           },
-          "text": "She lifts her head and turns, bruised shoulders bare, eyes widening toward something behind her.",
-          "audioDurationMs": 5060,
-          "trackOffsetMs": 708110
+          "text": "She hunches at the cliff edge, head bowed into her hands, a bruise on her shoulder.",
+          "audioDurationMs": 4588,
+          "trackOffsetMs": 700294
         },
         {
           "id": "sintel-0081",
           "gap": {
-            "startMs": 715926,
+            "startMs": 708110,
             "durationMs": 7816
           },
-          "text": "Boots stride over rocky ground; huge white drooping flowers tower beside her, dwarfing her small figure.",
-          "audioDurationMs": 6250,
-          "trackOffsetMs": 715926
+          "text": "She lifts her head, bruised and scraped, and turns to look behind her, eyes widening.",
+          "audioDurationMs": 4888,
+          "trackOffsetMs": 708110
         },
         {
           "id": "sintel-0082",
           "gap": {
-            "startMs": 723742,
+            "startMs": 715926,
             "durationMs": 7816
           },
-          "text": "She walks away along the ridge toward glowing light, shrinking against the misty mountains.",
-          "audioDurationMs": 4607,
-          "trackOffsetMs": 723742
+          "text": "Boots walk across the rocky ground, one leg a metal prosthetic. Huge white flowers tower nearby.",
+          "audioDurationMs": 6268,
+          "trackOffsetMs": 715926
         },
         {
           "id": "sintel-0083",
           "gap": {
-            "startMs": 731558,
+            "startMs": 723742,
             "durationMs": 7816
           },
-          "text": "A large shaggy creature pads onto the ridge beside her, lowering itself close.",
-          "audioDurationMs": 4594,
-          "trackOffsetMs": 731558
+          "text": "She walks away toward the hazy sun, shrinking into the distance between giant snowdrops and misty peaks.",
+          "audioDurationMs": 5975,
+          "trackOffsetMs": 723742
         },
         {
           "id": "sintel-0084",
           "gap": {
-            "startMs": 739374,
+            "startMs": 731558,
             "durationMs": 7816
           },
-          "text": "The distant pair sink lower onto the ridge, nearly vanishing against the rock and haze.",
-          "audioDurationMs": 4563,
-          "trackOffsetMs": 739374
+          "text": "A large shaggy creature lopes up over the rocks behind her and settles, watching.",
+          "audioDurationMs": 4538,
+          "trackOffsetMs": 731558
         },
         {
           "id": "sintel-0085",
           "gap": {
-            "startMs": 755006,
+            "startMs": 739374,
             "durationMs": 7816
           },
-          "text": "White credits appear over black: produced by Ton Roosendaal, screenplay by Esther Wouda.",
-          "audioDurationMs": 5064,
-          "trackOffsetMs": 755006
+          "text": "She sinks down behind the ridge, almost vanishing into the rocks beneath the towering snowdrops.",
+          "audioDurationMs": 5225,
+          "trackOffsetMs": 739374
         },
         {
           "id": "sintel-0086",
           "gap": {
-            "startMs": 762822,
+            "startMs": 755006,
             "durationMs": 7816
           },
-          "text": "More credits: art direction by David Revoy, music and sound by Jan Morgenstern.",
-          "audioDurationMs": 5113,
-          "trackOffsetMs": 762822
+          "text": "Credits in white on black: produced by Ton Roosendaal, screenplay by Esther Wouda.",
+          "audioDurationMs": 4913,
+          "trackOffsetMs": 755006
         },
         {
           "id": "sintel-0087",
+          "gap": {
+            "startMs": 762822,
+            "durationMs": 7816
+          },
+          "text": "More credits: art direction David Revoy, music and sound Jan Morgenstern.",
+          "audioDurationMs": 4725,
+          "trackOffsetMs": 762822
+        },
+        {
+          "id": "sintel-0088",
           "gap": {
             "startMs": 770638,
             "durationMs": 7816
           },
           "text": "Cast credit on black: Shaman, played by Thom Hoffman.",
-          "audioDurationMs": 3494,
+          "audioDurationMs": 3550,
           "trackOffsetMs": 770638
-        },
-        {
-          "id": "sintel-0088",
-          "gap": {
-            "startMs": 778454,
-            "durationMs": 7816
-          },
-          "text": "Credits continue scrolling: character animation and environment design crews listed in white on black.",
-          "audioDurationMs": 5896,
-          "trackOffsetMs": 778454
         },
         {
           "id": "sintel-0089",
           "gap": {
-            "startMs": 786270,
+            "startMs": 778454,
             "durationMs": 7816
           },
-          "text": "Credits shift onto a wooden plank wall with a curved blade and a child's drawing.",
-          "audioDurationMs": 3957,
-          "trackOffsetMs": 786270
+          "text": "More credits: character animation, then environment design, lighting and compositing teams.",
+          "audioDurationMs": 5550,
+          "trackOffsetMs": 778454
         },
         {
           "id": "sintel-0090",
           "gap": {
-            "startMs": 794086,
+            "startMs": 786270,
             "durationMs": 7816
           },
-          "text": "Credits scroll past aged parchment, a carved wooden club, a brass pocket watch and an engraved seal.",
-          "audioDurationMs": 5791,
-          "trackOffsetMs": 794086
+          "text": "Credits continue over weathered wooden planks, a child's sketch on parchment beside a pale curved horn.",
+          "audioDurationMs": 5413,
+          "trackOffsetMs": 786270
         },
         {
           "id": "sintel-0091",
           "gap": {
-            "startMs": 801902,
+            "startMs": 794086,
             "durationMs": 7816
           },
-          "text": "Credits roll on, the knife and drawing sliding off the top of the planks.",
-          "audioDurationMs": 4050,
-          "trackOffsetMs": 801902
+          "text": "Credits scroll past a carved wooden staff, aged parchment sheets and an ornate brass compass on the planks.",
+          "audioDurationMs": 5850,
+          "trackOffsetMs": 794086
         },
         {
           "id": "sintel-0092",
           "gap": {
-            "startMs": 809718,
+            "startMs": 801902,
             "durationMs": 7816
           },
-          "text": "Apples rest on wooden planks beside a drawing of a red-haired girl and dragon.",
-          "audioDurationMs": 4014,
-          "trackOffsetMs": 809718
+          "text": "Credits scroll upward past a knife handle; the parchment sketch of a standing child drifts out of frame.",
+          "audioDurationMs": 5600,
+          "trackOffsetMs": 801902
         },
         {
           "id": "sintel-0093",
           "gap": {
-            "startMs": 817534,
+            "startMs": 809718,
             "durationMs": 7816
           },
-          "text": "Painted scenes of a ruined city and sailing ships border the scrolling sponsor names.",
-          "audioDurationMs": 4409,
-          "trackOffsetMs": 817534
+          "text": "Credits rise past apples on the planks; a drawing of two armed figures on parchment appears.",
+          "audioDurationMs": 5338,
+          "trackOffsetMs": 809718
         },
         {
           "id": "sintel-0094",
           "gap": {
-            "startMs": 825350,
+            "startMs": 817534,
             "durationMs": 7816
           },
-          "text": "Long lists of sponsor names fill the planks; small paint tubes and brushes appear at lower right.",
-          "audioDurationMs": 5345,
-          "trackOffsetMs": 825350
+          "text": "Credits list sponsors beside parchment paintings of a flooded city and shipwrecks, brooms and a globe nearby.",
+          "audioDurationMs": 5975,
+          "trackOffsetMs": 817534
         },
         {
           "id": "sintel-0095",
           "gap": {
-            "startMs": 856614,
+            "startMs": 825350,
             "durationMs": 7816
           },
-          "text": "A painted face with long pale hair emerges at the right edge beside the names.",
-          "audioDurationMs": 4002,
-          "trackOffsetMs": 856614
+          "text": "Credits roll on; the parchment sketch slides away as long rows of sponsor names fill the planks.",
+          "audioDurationMs": 5388,
+          "trackOffsetMs": 825350
         },
         {
           "id": "sintel-0096",
           "gap": {
-            "startMs": 872246,
+            "startMs": 848798,
             "durationMs": 7816
           },
-          "text": "Names scroll past a painted dragon; a song title appears at the bottom.",
-          "audioDurationMs": 4149,
-          "trackOffsetMs": 872246
+          "text": "Names keep scrolling; the carved staff slips upward, a faint glowing shape appearing at the right edge.",
+          "audioDurationMs": 5638,
+          "trackOffsetMs": 848798
         },
         {
           "id": "sintel-0097",
           "gap": {
+            "startMs": 856614,
+            "durationMs": 7816
+          },
+          "text": "Names keep rising; at right, a pale drawn face with flowing hair emerges beside the staff.",
+          "audioDurationMs": 5688,
+          "trackOffsetMs": 856614
+        },
+        {
+          "id": "sintel-0098",
+          "gap": {
+            "startMs": 864430,
+            "durationMs": 7816
+          },
+          "text": "The drawn face drifts off the top; dense name columns now fill the wooden boards.",
+          "audioDurationMs": 4513,
+          "trackOffsetMs": 864430
+        },
+        {
+          "id": "sintel-0099",
+          "gap": {
+            "startMs": 872246,
+            "durationMs": 7816
+          },
+          "text": "A sketched dragon's head and coiled body appear behind the names; a song title rises below.",
+          "audioDurationMs": 5200,
+          "trackOffsetMs": 872246
+        },
+        {
+          "id": "sintel-0100",
+          "gap": {
             "startMs": 880062,
             "durationMs": 7848
           },
-          "text": "Credits scroll over a sketch of a girl cradling a small dragon beside a creature.",
-          "audioDurationMs": 4340,
+          "text": "A new sketch slides in: a small girl cradling a baby dragon, creatures beside her.",
+          "audioDurationMs": 5050,
           "trackOffsetMs": 880062
         }
       ]
     },
-    "provenance": "Generated 2026-10-14 · 98 descriptions, 0 refused",
+    "provenance": "Generated 2026-10-14 · 99 descriptions, 2 refused",
     "preview": {
       "baseUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/sintel/preview/",
       "fps": 2,
