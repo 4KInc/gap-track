@@ -119,16 +119,27 @@ export class DescriptionPlayer {
   }
 
   /**
-   * Drive one step. Call from the playback loop.
+   * Drive one step, reading the playhead from the programme.
    *
-   * Reads the playhead from the programme rather than taking it as an
-   * argument, so the description can never be scheduled against a clock that
-   * has drifted from what the viewer is watching.
+   * This is the right source wherever the device can decode: taking time
+   * from the media element means a description can never be scheduled
+   * against a moment the viewer is not at.
    */
   tick(): void {
-    if (this.mode === 'off') return;
+    this.tickAt(toMs(this.video.currentTime));
+  }
 
-    const playheadMs = toMs(this.video.currentTime);
+  /**
+   * Drive one step against a supplied playhead.
+   *
+   * For devices whose media clock never advances because they cannot decode
+   * (FRICTION.md entry 10), where reading `currentTime` would freeze the
+   * engine at zero and nothing would ever be due. The caller is responsible
+   * for the substitution being visible to the viewer — every cue and every
+   * decision here stays real, but "now" did not come from the programme.
+   */
+  tickAt(playheadMs: number): void {
+    if (this.mode === 'off') return;
     this.lastPlayheadMs = playheadMs;
 
     if (this.speaking) {

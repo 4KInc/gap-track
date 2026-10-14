@@ -28,6 +28,8 @@ export interface Title {
     manifest: CueManifest;
     /** How the track came to exist, shown so nobody has to guess. */
     provenance: string;
+    /** Stills shown where the device cannot decode. Absent on hardware. */
+    preview?: { baseUrl: string; fps: number; count: number; frames: string[] };
   };
 }
 
@@ -86,6 +88,7 @@ export const CATALOGUE: Title[] = TITLES.map((t) => {
       trackUrl: attached.trackUrl,
       manifest: attached.manifest,
       provenance: attached.provenance,
+      preview: attached.preview,
     },
   };
 });

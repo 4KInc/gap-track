@@ -12,6 +12,8 @@ export interface AttachedTrack {
   trackUrl: string;
   manifest: CueManifest;
   provenance: string;
+  /** Stills for devices that cannot decode video. Absent on hardware. */
+  preview?: { baseUrl: string; fps: number; count: number; frames: string[] };
 }
 
 export const ATTACHED: Record<string, AttachedTrack> = {
@@ -34,6 +36,33 @@ export const ATTACHED: Record<string, AttachedTrack> = {
         }
       ]
     },
-    "provenance": "Generated 2026-10-14 · 1 descriptions, 0 refused"
+    "provenance": "Generated 2026-10-14 · 1 descriptions, 0 refused",
+    "preview": {
+      "baseUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/bbb/preview/",
+      "fps": 2,
+      "count": 20,
+      "frames": [
+        "f00001.jpg",
+        "f00002.jpg",
+        "f00003.jpg",
+        "f00004.jpg",
+        "f00005.jpg",
+        "f00006.jpg",
+        "f00007.jpg",
+        "f00008.jpg",
+        "f00009.jpg",
+        "f00010.jpg",
+        "f00011.jpg",
+        "f00012.jpg",
+        "f00013.jpg",
+        "f00014.jpg",
+        "f00015.jpg",
+        "f00016.jpg",
+        "f00017.jpg",
+        "f00018.jpg",
+        "f00019.jpg",
+        "f00020.jpg"
+      ]
+    }
   }
 };

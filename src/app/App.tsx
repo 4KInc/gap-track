@@ -37,6 +37,7 @@ export function App(): React.JSX.Element {
       videoUrl={open.videoUrl}
       descriptionUrl={open.description.trackUrl}
       manifest={open.description.manifest}
+      preview={open.description.preview}
       onBack={back}
     />
   );

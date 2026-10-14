@@ -13,7 +13,11 @@
  * on a new film before paying for a few hundred vision calls.
  */
 
+import { execFile } from 'node:child_process';
 import { join } from 'node:path';
+import { promisify } from 'node:util';
+
+const run = promisify(execFile);
 
 import { ClaudeDescriber, claudeConfigured } from './describe/claude';
 import { SayVoice } from './synthesis/say';
@@ -21,6 +25,7 @@ import { buildTrack } from './build';
 import { mixDescribed } from './mix';
 import { ensureBucket, publishHls } from './publish';
 import { packageVideoHls } from './package';
+import { extractPreview } from './preview';
 import type { DescribeRequest, DescribeResult, Describer } from './describe/types';
 
 interface Args {
@@ -155,6 +160,18 @@ async function main(): Promise<void> {
     const ud = await publishHls(join(dir, 'hls'), {
       bucket: args.publish, prefix: `${args.title}/description`,
     });
+
+    // Stills for devices that cannot decode. Not fetched on hardware.
+    const strip = await extractPreview(args.video as string, join(dir, 'preview'));
+    await run('aws', [
+      's3', 'sync', strip.dir, `s3://${args.publish}/${args.title}/preview/`,
+      '--content-type', 'image/jpeg', '--exclude', '*.json',
+    ]);
+    await run('aws', [
+      's3', 'cp', strip.indexPath, `s3://${args.publish}/${args.title}/preview/frames.json`,
+      '--content-type', 'application/json',
+    ]);
+    process.stdout.write(`  preview: ${strip.count} frames at ${strip.fps}fps\n`);
     published = { video: up.playlistUrl, description: ud.playlistUrl };
     process.stdout.write(`  ${up.uploaded.length + ud.uploaded.length} objects\n`);
   }

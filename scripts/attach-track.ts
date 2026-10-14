@@ -23,6 +23,7 @@ interface Args {
   track?: string;
   videoUrl?: string;
   trackUrl?: string;
+  previewBase?: string;
 }
 
 function parse(argv: string[]): Args {
@@ -33,6 +34,7 @@ function parse(argv: string[]): Args {
     else if (argv[i] === '--track') a.track = next();
     else if (argv[i] === '--video-url') a.videoUrl = next();
     else if (argv[i] === '--track-url') a.trackUrl = next();
+    else if (argv[i] === '--preview-base') a.previewBase = next();
   }
   return a;
 }
@@ -46,6 +48,17 @@ async function main(): Promise<void> {
   }
 
   const built = JSON.parse(await readFile(args.track as string, 'utf8'));
+
+  // The preview index is fetched at build time rather than by the app, so a
+  // device that cannot decode also does not have to discover what exists.
+  let preview: unknown = undefined;
+  if (args.previewBase) {
+    const base = args.previewBase.endsWith('/') ? args.previewBase : `${args.previewBase}/`;
+    const res = await fetch(`${base}frames.json`);
+    if (!res.ok) throw new Error(`preview index not reachable: ${res.status}`);
+    const idx = (await res.json()) as { fps: number; count: number; frames: string[] };
+    preview = { baseUrl: base, fps: idx.fps, count: idx.count, frames: idx.frames };
+  }
 
   // Only the admitted cues travel to the device. Refused ones stay in the
   // build manifest as evidence; shipping them would invite the app to try
@@ -74,6 +87,8 @@ export interface AttachedTrack {
   trackUrl: string;
   manifest: CueManifest;
   provenance: string;
+  /** Stills for devices that cannot decode video. Absent on hardware. */
+  preview?: { baseUrl: string; fps: number; count: number; frames: string[] };
 }
 
 export const ATTACHED: Record<string, AttachedTrack> = ${JSON.stringify(
@@ -83,6 +98,7 @@ export const ATTACHED: Record<string, AttachedTrack> = ${JSON.stringify(
         trackUrl: args.trackUrl,
         manifest,
         provenance,
+        preview,
       },
     },
     null,

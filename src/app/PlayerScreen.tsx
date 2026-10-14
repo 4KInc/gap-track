@@ -17,10 +17,11 @@ import { KeplerVideoSurfaceView } from '@amazon-devices/react-native-w3cmedia';
 
 import { DescriptionPlayer, type CueManifest, type DescriptionMode } from '../player/DescriptionPlayer';
 import { DEFAULT_CONFIG, type SchedulerConfig } from '../engine/types';
-import { toMs } from '../player/ports';
 import { Focusable } from './Focusable';
 import { TrustOverlay, type OverlayEvent } from './TrustOverlay';
 import { useVegaPlayers } from './useVegaPlayers';
+import { useProgrammeClock } from './useProgrammeClock';
+import { PreviewSurface, type PreviewStripInfo } from './PreviewSurface';
 import { colour, mono, space, type } from './theme';
 
 export interface PlayerScreenProps {
@@ -30,6 +31,8 @@ export interface PlayerScreenProps {
   manifest: CueManifest;
   descriptionUrl: string;
   config?: Partial<SchedulerConfig>;
+  /** Stills to show where the device cannot decode. Absent on hardware. */
+  preview?: PreviewStripInfo;
   onBack?: () => void;
 }
 
@@ -52,12 +55,14 @@ export function PlayerScreen({
   manifest,
   descriptionUrl,
   config,
+  preview,
   onBack,
 }: PlayerScreenProps): React.JSX.Element {
   const players = useVegaPlayers(videoUrl, descriptionUrl);
   const [mode, setMode] = useState<DescriptionMode>('off');
   const [showOverlay, setShowOverlay] = useState(false);
-  const [playheadMs, setPlayheadMs] = useState(0);
+  const clock = useProgrammeClock(players.video);
+  const playheadMs = clock.playheadMs;
   const [events, setEvents] = useState<OverlayEvent[]>([]);
   const [speaking, setSpeaking] = useState<string | null>(null);
   /**
@@ -68,9 +73,11 @@ export function PlayerScreen({
    * indistinguishable from a stream that is merely slow — both show a black
    * rectangle and a frozen clock.
    */
-  const [media, setMedia] = useState('—');
+
 
   const engine = useRef<DescriptionPlayer | null>(null);
+  const playheadRef = useRef(0);
+  playheadRef.current = playheadMs;
   const merged: SchedulerConfig = { ...DEFAULT_CONFIG, ...config };
 
   // Build the engine once both players exist, and give it the cue list.
@@ -107,24 +114,10 @@ export function PlayerScreen({
       const v = players.video;
       if (!p || !v) return;
 
-      p.tick();
-      setPlayheadMs(toMs(v.currentTime));
-
-      const probe = v as unknown as {
-        readyState?: number;
-        duration?: number;
-        paused?: boolean;
-        error?: { code?: number; message?: string } | null;
-      };
-      const READY = ['NOTHING', 'METADATA', 'CURRENT', 'FUTURE', 'ENOUGH'];
-      const err = probe.error
-        ? ` err=${probe.error.code} "${(probe.error.message ?? '').slice(0, 60)}"`
-        : '';
-      setMedia(
-        `ready=${READY[probe.readyState ?? 0] ?? probe.readyState}`
-        + ` dur=${Number.isFinite(probe.duration) ? (probe.duration ?? 0).toFixed(1) : 'NaN'}`
-        + ` paused=${probe.paused}${err}`,
-      );
+      // Drive the engine from whichever clock is live. On a device that can
+      // decode, that is the programme; where it cannot, wall time, and the
+      // UI says which.
+      p.tickAt(playheadRef.current);
 
       const now = p.currentDecisions();
       if (now.length) {
@@ -133,7 +126,7 @@ export function PlayerScreen({
       setSpeaking(p.speakingText());
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [players.video]);
+  }, []);
 
   const choose = useCallback((next: DescriptionMode) => {
     setMode(next);
@@ -159,6 +152,20 @@ export function PlayerScreen({
         onSurfaceViewCreated={players.onSurfaceCreated}
         onSurfaceViewDestroyed={players.onSurfaceDestroyed}
       />
+
+      {preview && clock.source === 'wall' ? (
+        <PreviewSurface
+          strip={preview}
+          playheadMs={playheadMs}
+          reason={
+            clock.mediaError
+              ? 'this device cannot decode video'
+              : 'the programme stream is not advancing'
+          }
+        />
+      ) : null}
+
+      <View style={styles.scrim} pointerEvents="none" />
 
       <View style={styles.chrome}>
         <View style={styles.headRow}>
@@ -191,7 +198,11 @@ export function PlayerScreen({
           {onBack ? <Focusable label="Back" compact onPress={onBack} /> : null}
         </View>
 
-        <Text style={styles.diag}>{media}</Text>
+        <Text style={styles.diag}>
+          clock={clock.source}
+          {clock.durationMs ? ` · ${(clock.durationMs / 1000).toFixed(1)}s` : ''}
+          {clock.mediaError ? ` · decode err ${codeOf(clock.mediaError)}` : ''}
+        </Text>
 
         {mode === 'pause-describe' ? (
           <Text style={styles.note}>
@@ -212,6 +223,9 @@ export function PlayerScreen({
   );
 }
 
+/** Just the MediaError code. The GStreamer path behind it is noise. */
+const codeOf = (message: string): string => /code=(\d+)/.exec(message)?.[1] ?? '?';
+
 const fmt = (ms: number): string => {
   const s = Math.max(0, Math.floor(ms / 1000));
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -220,6 +234,17 @@ const fmt = (ms: number): string => {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colour.ground },
   surface: { ...StyleSheet.absoluteFillObject },
+  // Sits between the picture and the controls. Without it the chrome is
+  // unreadable over a bright frame, which on a television is the same as
+  // not being there.
+  scrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 420,
+    backgroundColor: 'rgba(8, 12, 13, 0.78)',
+  },
   chrome: {
     position: 'absolute',
     left: space.safe,
@@ -227,7 +252,7 @@ const styles = StyleSheet.create({
     right: space.safe,
   },
   headRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: space.md },
-  title: { color: colour.ink, fontSize: type.display, marginRight: space.md },
+  title: { color: colour.ink, fontSize: type.title, marginRight: space.md },
   clock: { color: colour.inkMuted, fontSize: type.body, fontFamily: mono },
   settingLabel: {
     color: colour.inkMuted,
@@ -238,6 +263,6 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: space.sm },
   modeButton: { marginRight: space.sm },
   note: { color: colour.inkMuted, fontSize: type.label, marginTop: space.xs },
-  diag: { color: colour.signal, fontSize: type.tiny, fontFamily: mono, marginTop: space.xs },
+  diag: { color: colour.inkMuted, fontSize: type.tiny, fontFamily: mono, marginTop: space.sm },
   error: { color: colour.signal, fontSize: type.body, marginVertical: space.md },
 });
