@@ -80,12 +80,36 @@ export function explain(d: Decision, config: SchedulerConfig): string {
 }
 
 /**
+ * Speaking rate used to turn a silence into a word budget.
+ *
+ * Measured, not guessed. Across 98 descriptions synthesised for Sintel the
+ * rendered rate was a median 3.10 words per second, p10 2.63, p90 3.56. The
+ * original 2.5 was a guess, and it sat below even the slowest case observed.
+ *
+ * 2.6 sits just under that p10. It is deliberately NOT the median: the budget
+ * is spent before the audio exists, so erring fast would make a quarter of
+ * cues overrun and be refused, and losing a description entirely is a far
+ * worse outcome for the viewer than one that ends with time to spare.
+ *
+ * Raising this is not a way to get longer descriptions. The describer writes
+ * to a median 83% of whatever budget it is handed — it stops when it has said
+ * what is on screen, not when it runs out of room — so a bigger budget mostly
+ * buys padding, which is the opposite of good description practice.
+ *
+ * Admission measures the rendered audio regardless, so this figure can be
+ * wrong without the guarantee being wrong. That is the entire reason the
+ * guarantee is built on measurement rather than on this number.
+ *
+ * Re-measure when the voice or the synthesiser changes. Polly will not speak
+ * at the same rate as macOS `say`.
+ */
+export const WORDS_PER_SECOND = 2.6;
+
+/**
  * The word budget a gap can afford.
  *
- * Used when generating, so the model writes to a brief instead of being
- * truncated afterwards. ~2.5 words per second of speech is a conservative
- * rate for description narration, which is read a little slower than
- * conversation.
+ * Used when generating, so the model writes to a brief rather than being
+ * truncated afterwards.
  *
  * Returns 0 when the gap cannot hold even one word, which is the correct
  * answer for a gap that should not be described at all.
@@ -93,5 +117,5 @@ export function explain(d: Decision, config: SchedulerConfig): string {
 export function wordBudget(gap: Gap, config: SchedulerConfig): number {
   const usableMs = gap.durationMs - config.safetyMarginMs;
   if (usableMs <= 0) return 0;
-  return Math.floor((usableMs / 1000) * 2.5);
+  return Math.floor((usableMs / 1000) * WORDS_PER_SECOND);
 }

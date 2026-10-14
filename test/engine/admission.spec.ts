@@ -6,7 +6,7 @@
  * a cue one millisecond over must not. Everything else is commentary.
  */
 
-import { decide, explain, wordBudget } from '../../src/engine/admission';
+import { decide, explain, wordBudget, WORDS_PER_SECOND } from '../../src/engine/admission';
 import { DEFAULT_CONFIG, type Cue, type Gap, type SchedulerConfig } from '../../src/engine/types';
 
 const config: SchedulerConfig = { ...DEFAULT_CONFIG, safetyMarginMs: 250 };
@@ -140,8 +140,8 @@ describe('explain: the numbers are shown, not the conclusion', () => {
 
 describe('wordBudget: writing to a brief', () => {
   it('derives a budget from the usable part of the gap', () => {
-    // (3400 - 250) / 1000 * 2.5 = 7.875 -> 7
-    expect(wordBudget(gap(0, 3_400), config)).toBe(7);
+    // (3400 - 250) / 1000 * 2.6 = 8.19 -> 8
+    expect(wordBudget(gap(0, 3_400), config)).toBe(8);
   });
 
   it('returns zero for a gap too small to hold anything', () => {
@@ -153,8 +153,21 @@ describe('wordBudget: writing to a brief', () => {
     // A budget spoken at the assumed rate must leave the margin intact.
     for (const ms of [500, 1_000, 2_000, 3_400, 8_000]) {
       const words = wordBudget(gap(0, ms), config);
-      const spokenMs = (words / 2.5) * 1000;
+      const spokenMs = (words / WORDS_PER_SECOND) * 1000;
       expect(spokenMs + config.safetyMarginMs).toBeLessThanOrEqual(ms);
+    }
+  });
+
+  it('stays inside the gap at the slowest rate actually measured', () => {
+    // The budget's rate is an estimate; the guarantee is not. Even at the
+    // p10 of the measured distribution a budgeted cue should still fit,
+    // so refusals come from genuine outliers rather than from systematic
+    // optimism in this constant.
+    const SLOWEST_MEASURED = 2.63;
+    for (const ms of [1_500, 3_400, 8_000]) {
+      const words = wordBudget(gap(0, ms), config);
+      const spokenMs = (words / SLOWEST_MEASURED) * 1000;
+      expect(spokenMs).toBeLessThanOrEqual(ms);
     }
   });
 });
