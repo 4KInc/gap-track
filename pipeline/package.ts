@@ -165,3 +165,64 @@ export async function decodeToWav(
 function hlsInputFlags(input: string): string[] {
   return input.endsWith('.m3u8') ? ['-allowed_extensions', 'ALL'] : [];
 }
+
+
+/**
+ * Package the programme itself as fragmented HLS.
+ *
+ * A described title needs both streams reachable over https, or the cue
+ * offsets refer to a video the device cannot play. Video is copied rather
+ * than re-encoded: the picture is untouched, so nothing in the demo can be
+ * blamed on this step, and packaging a feature film takes seconds instead of
+ * an hour.
+ */
+export async function packageVideoHls(
+  videoPath: string,
+  outDir: string,
+  opts: { segmentSeconds?: number } = {},
+): Promise<{ playlistPath: string; segmentCount: number }> {
+  const segmentSeconds = opts.segmentSeconds ?? 6;
+  await mkdir(outDir, { recursive: true });
+  const playlistPath = join(outDir, 'index.m3u8');
+
+  const args = [
+    '-hide_banner', '-loglevel', 'error', '-y',
+    '-i', videoPath,
+    '-c:v', 'copy',
+  ];
+
+  // Silent material has no audio stream to encode, and asking for one fails
+  // the mux rather than producing a video-only playlist.
+  if (await hasAudio(videoPath)) {
+    args.push('-c:a', 'aac', '-b:a', '128k');
+  } else {
+    args.push('-an');
+  }
+
+  args.push(
+    '-f', 'hls',
+    '-hls_time', String(segmentSeconds),
+    '-hls_playlist_type', 'vod',
+    '-hls_segment_type', 'fmp4',
+    '-hls_fmp4_init_filename', 'init.mp4',
+    '-hls_segment_filename', join(outDir, 'seg_%04d.m4s'),
+    '-hls_list_size', '0',
+    playlistPath,
+  );
+
+  await run(FFMPEG, args);
+
+  const segmentCount = (await readdir(outDir)).filter((f) => f.endsWith('.m4s')).length;
+  if (segmentCount === 0) throw new Error(`packaging produced no video segments in ${outDir}`);
+  return { playlistPath, segmentCount };
+}
+
+async function hasAudio(path: string): Promise<boolean> {
+  let stderr = '';
+  try {
+    await run(FFMPEG, ['-hide_banner', '-i', path]);
+  } catch (err) {
+    stderr = (err as { stderr?: string }).stderr ?? '';
+  }
+  return /Stream #\d+:\d+.*: Audio:/.test(stderr);
+}

@@ -19,6 +19,8 @@ import { ClaudeDescriber, claudeConfigured } from './describe/claude';
 import { SayVoice } from './synthesis/say';
 import { buildTrack } from './build';
 import { mixDescribed } from './mix';
+import { ensureBucket, publishHls } from './publish';
+import { packageVideoHls } from './package';
 import type { DescribeRequest, DescribeResult, Describer } from './describe/types';
 
 interface Args {
@@ -31,6 +33,7 @@ interface Args {
   margin?: number;
   voice?: string;
   mix: boolean;
+  publish?: string;
 }
 
 function parseArgs(argv: string[]): Args {
@@ -47,6 +50,7 @@ function parseArgs(argv: string[]): Args {
     else if (a === '--voice') args.voice = next();
     else if (a === '--dry') args.dry = true;
     else if (a === '--mix') args.mix = true;
+    else if (a === '--publish') args.publish = next();
     else if (a === '--help' || a === '-h') {
       usage();
       process.exit(0);
@@ -71,6 +75,7 @@ Build a description track for a film.
   --voice <name>      macOS say voice              (default Samantha)
   --dry               skip the API, placeholder text
   --mix               also render <title>-described.mp4
+  --publish <bucket>  upload the track to S3 and print its https URL
 
 The Vega simulator has no audio hardware, so --mix produces the file that
 can actually be heard: the programme with its audio ducked under the
@@ -126,6 +131,27 @@ async function main(): Promise<void> {
     log: (line) => process.stdout.write(`${line}\n`),
   });
 
+  let published: { video: string; description: string } | null = null;
+  if (args.publish) {
+    const dir = join(args.out, args.title as string);
+    process.stdout.write(`publishing to s3://${args.publish}…\n`);
+    await ensureBucket(args.publish);
+
+    // Both streams, or the cue offsets refer to a video the device cannot
+    // fetch. Packaging the programme is copy-only, so it costs seconds.
+    const v = await packageVideoHls(args.video as string, join(dir, 'video-hls'));
+    process.stdout.write(`  programme: ${v.segmentCount} segments\n`);
+
+    const up = await publishHls(join(dir, 'video-hls'), {
+      bucket: args.publish, prefix: `${args.title}/video`,
+    });
+    const ud = await publishHls(join(dir, 'hls'), {
+      bucket: args.publish, prefix: `${args.title}/description`,
+    });
+    published = { video: up.playlistUrl, description: ud.playlistUrl };
+    process.stdout.write(`  ${up.uploaded.length + ud.uploaded.length} objects\n`);
+  }
+
   let mixed: string | null = null;
   if (args.mix) {
     const out = join(args.out, args.title as string, `${args.title}-described.mp4`);
@@ -144,7 +170,10 @@ async function main(): Promise<void> {
     + `  ${result.describedCount} descriptions across ${result.gapCount} gaps\n`
     + `  ${result.declinedCount} declined, ${result.track.rejected.length} refused by admission\n`
     + `  ${result.packaged.playlistPath}\n`
-    + (mixed ? `  ${mixed}\n` : ''),
+    + (mixed ? `  ${mixed}\n` : '')
+    + (published
+      ? `\n  programme   ${published.video}\n  description ${published.description}\n`
+      : ''),
   );
 }
 

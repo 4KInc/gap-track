@@ -9,6 +9,7 @@
  */
 
 import type { CueManifest } from '../player/DescriptionPlayer';
+import { ATTACHED } from './tracks.generated';
 
 export interface Title {
   id: string;
@@ -36,15 +37,12 @@ export interface Title {
  * Deliberately mostly undescribed. A library where everything is described
  * would show a solved problem; this shows the one that exists.
  */
-export const CATALOGUE: Title[] = [
+const TITLES: Title[] = [
   {
-    id: 'bipbop',
-    name: 'Reference Stream',
-    attribution: 'Apple Inc. · developer test stream',
-    videoUrl:
-      'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
-    // Description is filled in at build time by scripts/attach-track.ts once
-    // the pipeline has produced a manifest for it.
+    id: 'bbb',
+    name: 'Big Buck Bunny',
+    attribution: '(c) copyright 2008 Blender Foundation · CC-BY 3.0 · peach.blender.org',
+    videoUrl: '', // replaced from the attached track; see below
   },
   {
     id: 'archive-reel',
@@ -53,7 +51,34 @@ export const CATALOGUE: Title[] = [
     videoUrl:
       'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8',
   },
+  {
+    id: 'bipbop',
+    name: 'Reference Stream',
+    attribution: 'Apple Inc. · developer test stream',
+    videoUrl:
+      'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
+  },
 ];
+
+/**
+ * Merge in whatever tracks have actually been built and published.
+ *
+ * A title is described only if a track exists for it, and the catalogue
+ * cannot claim otherwise: the badge in the library reads straight off this.
+ */
+export const CATALOGUE: Title[] = TITLES.map((t) => {
+  const attached = ATTACHED[t.id];
+  if (!attached) return t;
+  return {
+    ...t,
+    videoUrl: attached.videoUrl,
+    description: {
+      trackUrl: attached.trackUrl,
+      manifest: attached.manifest,
+      provenance: attached.provenance,
+    },
+  };
+});
 
 export const findTitle = (id: string): Title | undefined =>
   CATALOGUE.find((t) => t.id === id);
