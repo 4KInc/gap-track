@@ -43,7 +43,7 @@ export interface DescriptionPlayerOptions {
 
 export class DescriptionPlayer {
   private readonly scheduler: CueScheduler;
-  private readonly config: SchedulerConfig;
+  private config: SchedulerConfig;
   private readonly duckTo: number;
   private readonly sink: DecisionSink;
 
@@ -73,6 +73,24 @@ export class DescriptionPlayer {
     this.scheduler = new CueScheduler(this.config);
     this.duckTo = opts.duckTo ?? 0.3;
     this.sink = opts.onDecision ?? (() => {});
+  }
+
+  /** The constants decisions are measured against, for display. */
+  settings(): SchedulerConfig {
+    return this.scheduler.settings();
+  }
+
+  /**
+   * Change how much silence must be left clear after a description ends.
+   *
+   * Exposed to the viewer rather than fixed, because it is the one number in
+   * the rule that is a preference rather than a measurement. Raising it buys
+   * distance from the dialogue and costs descriptions; the arithmetic on
+   * screen shows exactly which ones, and why.
+   */
+  setSafetyMargin(ms: number): void {
+    this.scheduler.setSafetyMargin(ms);
+    this.config = this.scheduler.settings();
   }
 
   load(manifest: CueManifest): void {

@@ -117,6 +117,61 @@ whenBuilt('a whole film, ticked at the device rate', () => {
     expect(collisions).toEqual([]);
   }, 120_000);
 
+  it('refuses more as the viewer asks for more room, and silence at the extreme', () => {
+    // The margin is a preference, so it is the viewer's to set — but the
+    // price has to be real. At 3s of required clearance a 14-minute film
+    // keeps 18 of its 99 descriptions: the engine goes quiet rather than
+    // crowd the dialogue, which is the behaviour the whole project claims.
+    const counts = [250, 750, 1_500, 3_000].map((marginMs) => {
+      const video = new FakePort();
+      const description = new FakePort();
+      const player = new DescriptionPlayer(video, description, {
+        config: { safetyMarginMs: marginMs },
+      });
+      player.load(manifest);
+      player.setMode('adaptive');
+      video.play();
+
+      const heard = new Set<string>();
+      for (let t = 0; t <= manifest.durationMs; t += TICK_MS) {
+        video.currentTime = t / 1000;
+        player.tickAt(t);
+        player.currentDecisions();
+        const saying = player.speakingText();
+        if (saying) heard.add(saying);
+      }
+      return heard.size;
+    });
+
+    // Monotonically fewer: more required clearance can never admit more.
+    for (let i = 1; i < counts.length; i++) {
+      expect(counts[i]).toBeLessThanOrEqual(counts[i - 1]);
+    }
+    expect(counts[0]).toBe(manifest.cues.length);
+    expect(counts[counts.length - 1]).toBeLessThan(manifest.cues.length / 2);
+  }, 120_000);
+
+  it('takes a margin change mid-playback without cutting off a cue already sounding', () => {
+    const video = new FakePort();
+    const description = new FakePort();
+    const player = new DescriptionPlayer(video, description);
+    player.load(manifest);
+    player.setMode('adaptive');
+    video.play();
+
+    const target = manifest.cues[10];
+    player.tickAt(target.gap.startMs);
+    expect(player.speakingText()).toBe(target.text);
+
+    // A cue already cleared keeps the margin it was admitted under: the
+    // dialogue it was checked against has not moved, so cutting it off
+    // mid-word would cost the viewer a description and protect nothing.
+    player.setSafetyMargin(3_000);
+    expect(player.settings().safetyMarginMs).toBe(3_000);
+    player.tickAt(target.gap.startMs + 100);
+    expect(player.speakingText()).toBe(target.text);
+  });
+
   it('abandons a cue when the viewer seeks away from its gap', () => {
     const video = new FakePort();
     const description = new FakePort();

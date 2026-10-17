@@ -30,7 +30,7 @@ export interface SchedulerEvent {
 }
 
 export class CueScheduler {
-  private readonly config: SchedulerConfig;
+  private config: SchedulerConfig;
   private cues: Cue[] = [];
   private pending = new Set<string>();
   private played = new Map<string, number>(); // id -> playhead when played
@@ -42,6 +42,29 @@ export class CueScheduler {
 
   constructor(config: Partial<SchedulerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+  }
+
+  /** The constants every decision is measured against. */
+  settings(): SchedulerConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Change the safety margin mid-playback.
+   *
+   * The margin is a judgement about how close to dialogue is close enough,
+   * and that is a viewer's call, not ours: someone who finds narration
+   * crowding the dialogue should be able to buy more room, at the price of
+   * hearing fewer descriptions. The trade is real and the arithmetic makes
+   * it visible.
+   *
+   * Only cues not yet decided are affected. A cue already sounding keeps the
+   * margin it was admitted under, because retroactively failing something
+   * already halfway spoken would cut it off mid-word for no benefit — the
+   * dialogue it was cleared against has not moved.
+   */
+  setSafetyMargin(ms: number): void {
+    this.config = { ...this.config, safetyMarginMs: Math.max(0, Math.round(ms)) };
   }
 
   /**

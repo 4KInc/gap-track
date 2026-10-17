@@ -49,6 +49,16 @@ const MODES: Array<{ mode: DescriptionMode; label: string }> = [
   { mode: 'pause-describe', label: 'Pause and Describe' },
 ];
 
+/**
+ * Offered margins.
+ *
+ * 250ms is the default and the figure every published number was measured
+ * at. The larger ones are not padding for its own sake: at 1500ms a real
+ * film starts refusing descriptions that fit comfortably at 250ms, which is
+ * the trade made visible rather than described.
+ */
+const MARGINS = [250, 750, 1_500, 3_000];
+
 export function PlayerScreen({
   title,
   videoUrl,
@@ -86,7 +96,14 @@ export function PlayerScreen({
   // the engine at all.
   const videoRef = useRef<ReturnType<typeof useVegaPlayers>['video']>(null);
   videoRef.current = players.video;
-  const merged: SchedulerConfig = { ...DEFAULT_CONFIG, ...config };
+  // The one constant in the rule that is a preference rather than a
+  // measurement, so it belongs to the viewer. Raising it buys distance from
+  // the dialogue and costs descriptions, and the arithmetic on screen names
+  // which ones it cost.
+  const [marginMs, setMarginMs] = useState<number>(
+    config?.safetyMarginMs ?? DEFAULT_CONFIG.safetyMarginMs,
+  );
+  const merged: SchedulerConfig = { ...DEFAULT_CONFIG, ...config, safetyMarginMs: marginMs };
 
   // Build the engine once both players exist, and give it the cue list.
   useEffect(() => {
@@ -195,6 +212,24 @@ export function PlayerScreen({
           ))}
         </View>
 
+        <Text style={styles.settingLabel}>SAFETY MARGIN · {marginMs}ms</Text>
+        <View style={styles.row}>
+          {MARGINS.map((ms) => (
+            <Focusable
+              key={ms}
+              label={`${ms}ms`}
+              compact
+              selected={marginMs === ms}
+              disabled={!players.ready}
+              onPress={() => {
+                setMarginMs(ms);
+                engine.current?.setSafetyMargin(ms);
+              }}
+              style={styles.marginButton}
+            />
+          ))}
+        </View>
+
         <View style={styles.row}>
           <Focusable
             label={showOverlay ? 'Hide admission detail' : 'Show admission detail'}
@@ -268,6 +303,7 @@ const styles = StyleSheet.create({
     marginBottom: space.xs,
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: space.sm },
+  marginButton: { minWidth: 120 },
   modeButton: { marginRight: space.sm },
   note: { color: colour.inkMuted, fontSize: type.label, marginTop: space.xs },
   diag: { color: colour.inkMuted, fontSize: type.tiny, fontFamily: mono, marginTop: space.sm },
