@@ -24,8 +24,6 @@ export interface LibraryScreenProps {
 
 export function LibraryScreen({ titles, onOpen }: LibraryScreenProps): React.JSX.Element {
   const described = describedCount(titles);
-  const [focusedLabel, setFocusedLabel] = React.useState<string | null>(null);
-
   return (
     <View style={styles.root}>
       <Text style={styles.brand}>The Gap Track</Text>
@@ -40,17 +38,10 @@ export function LibraryScreen({ titles, onOpen }: LibraryScreenProps): React.JSX
             title={t}
             autoFocus={i === 0}
             onOpen={onOpen}
-            onFocusChange={setFocusedLabel}
           />
         ))}
       </View>
 
-      {/* Which control the remote is actually on. Without this, a press that
-          goes nowhere is indistinguishable from a dead app — the failure that
-          cost days in the spike. */}
-      <Text style={styles.focusNote}>
-        focus: {focusedLabel ?? 'nothing yet — press a direction on the remote'}
-      </Text>
     </View>
   );
 }
@@ -59,12 +50,10 @@ function Row({
   title,
   autoFocus,
   onOpen,
-  onFocusChange,
 }: {
   title: Title;
   autoFocus: boolean;
   onOpen: (t: Title) => void;
-  onFocusChange: (label: string) => void;
 }) {
   const has = Boolean(title.description);
 
@@ -95,7 +84,6 @@ function Row({
         label={has ? 'Watch' : 'Watch without description'}
         autoFocus={autoFocus}
         onPress={() => onOpen(title)}
-        onFocusChange={onFocusChange}
       />
     </View>
   );
@@ -105,13 +93,16 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colour.ground, paddingHorizontal: space.safe, paddingVertical: space.lg },
   brand: { color: colour.ink, fontSize: type.title, marginBottom: space.xs },
   summary: { color: colour.inkMuted, fontSize: type.body, marginBottom: space.md },
-  list: { flex: 1, justifyContent: 'center' },
+  // Not centred, and clipped. Four rows of 10-foot type are taller than the
+  // space left under the header, and centring overflow pushes it out of BOTH
+  // ends — which drew the first row straight over the title.
+  list: { flex: 1, overflow: 'hidden' },
 
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: space.sm,
+    paddingVertical: space.xs,
     borderBottomWidth: 1,
     borderBottomColor: colour.line,
   },
@@ -133,5 +124,4 @@ const styles = StyleSheet.create({
   badgeTextOff: { color: colour.signal },
 
   provenance: { color: colour.inkMuted, fontSize: type.tiny, marginTop: space.xs },
-  focusNote: { color: colour.inkMuted, fontSize: type.tiny, marginTop: space.md },
 });
