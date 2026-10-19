@@ -9,122 +9,218 @@ Primary track: **Fire TV / Vega OS**. Mini challenges: **AWS Builder**, **Open S
 
 ## The problem
 
-If you can't see the screen you get the dialogue and the sound effects, and you
+If you cannot see the screen you get the dialogue and the sound effects, and you
 miss everything that happens silently. A character reads a letter and their face
 changes. Someone pockets a knife. A car pulls up outside. None of it is in the
 audio, so the story stops making sense.
 
-Audio description fixes it with a second voice speaking in the pauses between
+Audio description fixes that with a second voice speaking in the pauses between
 lines. Today a person writes those lines — watching the film, finding each gap,
-timing it, writing something that fits. That costs **$15–30 per finished minute**
-and up to $75 for feature film, because a describer needs six to twelve minutes
-of work per minute of video.
+timing it, writing something that fits — which takes six to twelve minutes of
+work per minute of video. Commercial description is priced per *finished minute*
+and is widely quoted in the $15–30 range.
 
-Netflix describes roughly 40% of its library. Everyone smaller describes none of
-it: a thousand-hour catalogue is $900,000 at the cheapest professional rate.
-Archive film, independent distributors, regional and community broadcasters,
-educational libraries — all publishing to the Fire TV Appstore, none of them able
-to pay for it.
+At that rate a thousand-hour catalogue costs on the order of a million dollars.
+So the content that gets described is the content someone can justify paying to
+describe, and everything else — archive film, independent distribution, regional
+and community broadcasting, educational libraries — goes undescribed. Not
+because the technology is missing, but because the economics never close.
+
+For comparison, this pipeline described a 14.8-minute film for **$0.13**, a
+measured **$0.53 per described hour**.
 
 ## What this is
 
-A Fire TV player that writes the description itself, at playback time, for video
-nobody has ever described.
+A Fire TV player that writes the description itself, for video nobody has ever
+described.
 
-It runs ahead of the playhead, finds and **measures** the pauses in the dialogue,
-looks at what is on screen, writes a line short enough to fit the pause it is
-aimed at, synthesises the speech, and then checks the arithmetic.
+It finds and **measures** the pauses in the dialogue, looks at what is on screen,
+writes a line short enough to fit the pause it is aimed at, synthesises the
+speech, measures the rendered audio, and then checks one inequality:
 
 ```
-admit cue  ⟺  ttsDuration + safetyMargin ≤ measuredGap
+admit cue  ⟺  audioDurationMs + safetyMarginMs ≤ gap.durationMs
 ```
 
-If it fits, it plays. If it doesn't, **the line is discarded** — not shortened,
+If it fits, it plays. If it does not, **the line is discarded** — not shortened,
 not faded under, not played late.
 
 ## Why that rule is the point
 
-The failure that would ruin this isn't a mediocre description. It's one that
-talks over the dialogue: now the viewer has lost the line they could hear *and*
-didn't get the picture.
+Both sides of that comparison are measurements, not estimates.
 
-So the model never decides whether to speak. It writes to a word budget derived
-from a measured gap. A scheduler compares two numbers. Late, long, or malformed
-cues all take the same path — dropped, with the reason logged.
+`audioDurationMs` is read back off the rendered audio file — sample count over
+sample rate — never a words-per-minute guess. `gap.durationMs` comes from the
+caption track, which marks dialogue to the millisecond. Nothing in the decision
+is a model's opinion about how long it takes to say something.
 
-The model proposes. The scheduler disposes.
+That is what makes "never talks over dialogue" a guarantee rather than a hope. A
+system that estimated would be right most of the time, and the times it was
+wrong would be exactly the moments the viewer needed.
 
-## Status
+The arithmetic is shown on screen, with both operands labelled, so the claim can
+be checked rather than trusted.
 
-> **Pre-spike.** Three runtime assumptions are unverified and everything waits on
-> them. See [`spike/`](./spike) — nothing else gets built until `spike/RESULTS.md`
-> has numbers in it.
+## Results, on a real film
 
-| Question | Status | If it fails |
-|---|---|---|
-| Can a cue element sound while video audio plays? | unverified | Pause-and-Describe becomes the primary mode |
-| Can programme volume duck independently? | unverified | Synthesise cues louder, leave the mix alone |
-| What is the real resolution of `currentTime`? | unverified | Widen the margin, or use a separate timebase |
+[Sintel](https://durian.blender.org) — 14.8 minutes, Blender Foundation, CC-BY,
+no audio description anywhere it is published.
 
-## Two modes
+```
+107 silences found
+ 99 described
+  6 declined by the describer   (nothing worth saying)
+  2 refused by admission        (would not fit)
 
-**Adaptive Description** — narration plays inside verified dialogue-free gaps.
-Cues that cannot fit are skipped silently.
+512s of narration placed around 77.2s of dialogue
+  0 collisions
+```
 
-**Pause-and-Describe** — for content with no usable gaps (lectures, documentaries,
-dense dialogue) the player pauses at a scene boundary, speaks, and resumes. Costs
-flow, safe by construction: a paused programme has no dialogue to mask.
+One of the two refusals is four words long — *"It settles, eye closing."* —
+needing 1788ms in a 1900ms gap. 138ms too long, so it does not play.
 
-Both run through the same scheduler, so the guarantee holds either way.
+Verified two ways, independently of the code that built it:
+
+```bash
+npx tsx scripts/verify-track.ts   build/demo/sintel-track.json
+npx tsx scripts/verify-no-overlap.ts build/demo/sintel-track.json sintel_en.srt
+```
+
+The first re-checks every cue against the engine. The second replays each cue as
+the interval it will occupy and intersects it with the speech intervals parsed
+straight out of the caption file — so a bug that corrupted the gap list could
+not also corrupt the thing checking it.
+
+The safety margin is adjustable in the app, because it is the one constant in
+the rule that is a preference rather than a measurement. Raising it buys
+distance from the dialogue and costs descriptions:
+
+| Margin | Plays | Refused | Narration |
+|---|---|---|---|
+| 250ms | 99 | 0 | 512s |
+| 750ms | 97 | 2 | 500s |
+| 1500ms | 86 | 13 | 438s |
+| 3000ms | 18 | **81** | 78s |
+
+At three seconds the engine goes almost completely quiet rather than crowd the
+dialogue.
 
 ## Architecture
 
+Description is built by a pipeline, ahead of playback. The app schedules and
+plays what the pipeline produced, and applies the same admission rule again at
+playback time against the live playhead.
+
 ```
-Fire TV / Vega OS app
-  │  playhead + lookahead window
-  ▼
-Gap scheduler · admission control          ← deterministic, no model
-  │                        ▲
-  │ visual context         │ measured audio duration
-  ▼                        │
-Amazon Bedrock ──────► Amazon Polly
-  (word-budgeted           (synthesis; the asset is
-   candidate line)          measured, not estimated)
-  │
-  ▼
-Amazon S3 — cue cache, keyed by media hash + timestamp
+BUILD TIME (pipeline/)
+  captions ──► gaps ──────────────────────┐   invert the dialogue
+  video ─────► frames at each gap ──┐     │
+                                    ▼     ▼
+                            Claude (Anthropic API)
+                       writes to a word budget, or declines
+                                    │
+                                    ▼
+                            Amazon Polly  (PCM, so duration is exact)
+                                    │
+                                    ▼
+                          measure the rendered audio
+                                    │
+                                    ▼
+                          ADMISSION  ← deterministic, no model
+                                    │
+                                    ▼
+                    fMP4 HLS description track ──► Amazon S3
+
+PLAYBACK (src/)
+  programme clock ──► scheduler ──► admission ──► description track
+                                        │
+                                        ▼
+                                  trust overlay
+                          (the arithmetic, both operands)
 ```
 
-The device never decodes a frame for analysis. It sends a playhead position; the
-backend already has the media URL.
+Admission is pure arithmetic over measured values and contains no model call,
+which is why the guarantee survives the model being wrong.
 
 See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and
 [`docs/AWS-INTEGRATION.md`](./docs/AWS-INTEGRATION.md).
+
+## AWS
+
+**Polly** synthesises every description, as PCM rather than MP3 so the duration
+is exact rather than inferred from frame headers. **S3** serves the programme,
+the description track and the preview frames as fragmented HLS — the only media
+shape Vega will play (see [`FRICTION.md`](./FRICTION.md) entry 5).
+
+Bedrock is deliberately not used: Claude is reached through the Anthropic API
+directly. The describer sits behind an interface, so Bedrock would be a swap at
+that seam with nothing above it changing. Lambda, DynamoDB and CloudWatch are
+left out for the same reason — they would raise the service count without doing
+work the pipeline needs.
 
 ## Getting started
 
 Requires the Vega SDK (macOS or Linux; Windows is not supported).
 
+The documented prerequisites are overstated. The installer hard-requires only
+**curl, tar and jq**, and needs no `sudo`, no Homebrew and no Rosetta 2 — this
+was measured, and is [`FRICTION.md`](./FRICTION.md) entry 1.
+
 ```bash
-# Prerequisites
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-[[ $(arch) == "arm64" ]] && softwareupdate --install-rosetta --agree-to-license
-brew update && brew install binutils coreutils gawk findutils grep jq lz4 gnu-sed watchman
+# SDK
+curl -fsSL https://sdk-installer.vega.labcollab.net/get_vvm.sh | bash
+source ~/vega/env && vega --version
 
-# Vega Developer Tools (close VS Code first)
-curl -fsSL https://sdk-installer.vega.labcollab.net/get_vvm.sh | bash && source ~/vega/env
-vega --version
-
-# Run on the virtual device
-vega virtual-device start
-vega run-app <vpkg-path> <app-id> -d VirtualDevice
+# Build and run
+npm install
+npm run build:release
+vega virtual-device start --gui
+vega device install-app -p build/.../gaptrack_aarch64.vpkg
+vega device launch-app -a com.fourkinc.gaptrack.main   # the COMPONENT id
 ```
+
+`launch-app` wants the component id, not the package id, and says neither when
+it refuses — [`FRICTION.md`](./FRICTION.md) entry 11.
+
+### Building a description track
+
+```bash
+export ANTHROPIC_API_KEY=...
+npx tsx pipeline/cli.ts \
+  --video film.mp4 --captions film.srt --title myfilm \
+  --out build/tracks --publish <s3-bucket> --transcode --mix
+```
+
+`--synth say` substitutes macOS speech for Polly, to work without AWS
+credentials. `--dry` checks gaps and timing without calling any model.
+
+## A note on the virtual device
+
+The Vega Virtual Device has no audio output and cannot decode video — not for
+our streams and not for Amazon's own reference stream, which is how we know it
+is the device rather than our packaging ([`FRICTION.md`](./FRICTION.md) entries
+9 and 10).
+
+So on the emulator the app shows preview stills advanced by the playhead, and
+**says so on screen**. Every decision, measurement and refusal is real; only the
+picture is substituted, and the substitution is labelled rather than hidden.
+
+## Friction log
+
+[`FRICTION.md`](./FRICTION.md) — 12 entries, every one measured on this machine
+during this build, with the exact error text and a suggested fix. Nothing in it
+is reconstructed or assumed.
 
 ## Demo content
 
 Blender Foundation open movies (CC-BY). Attribution is carried in-app and in
 [`assets/ATTRIBUTION.md`](./assets/ATTRIBUTION.md). No third-party copyrighted
 material appears anywhere in this repository or the demo video.
+
+Shaka Player is vendored from
+[`AmazonAppDev/vega-video-sample`](https://github.com/AmazonAppDev/vega-video-sample)
+under MIT-0. The files carry stale `PROPRIETARY/CONFIDENTIAL` headers despite
+the repository's licence — [`FRICTION.md`](./FRICTION.md) entry 6.
 
 ## Licence
 
