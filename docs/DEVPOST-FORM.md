@@ -1,8 +1,8 @@
-# Devpost form — every field, paste-ready
+# Devpost form: every field, paste-ready
 
 Submission: `devpost.com/submit-to/30992-build-ship-shape-amazon-developer-hackathon`
 
-Fields marked **[YOU]** need your own answer — I don't have the facts for them.
+Fields marked **[YOU]** need your own answer. I don't have the facts for them.
 
 ---
 
@@ -20,7 +20,7 @@ Playback-time audio description for Fire TV that provably never talks over the d
 *167 characters.*
 
 ## Thumbnail
-A still of the admission overlay mid-decision — the arithmetic with both operands
+A still of the admission overlay mid-decision: the arithmetic with both operands
 labelled. It is the one image that states the whole project, and it is the frame
 nobody else will have. 3:2, under 5MB.
 
@@ -54,10 +54,10 @@ https://github.com/4KInc/gap-track
 Skip. The repo has everything and the 35MB limit will not hold the described film.
 
 ## Submitter Type
-**[YOU]** — Individual, unless you are entering under 4K Inc.
+**[YOU]** Individual, unless you are entering under 4K Inc.
 
 ## Organization Name
-**[YOU]** — `N/A`, or `4K Inc` if you are entering under it. Match the previous answer.
+**[YOU]** Answer `N/A`, or `4K Inc` if you are entering under it. Match the previous answer.
 
 ## Submitter Country of Residence
 **[YOU]**
@@ -71,7 +71,7 @@ N/A
 ```
 Fire TV
 ```
-Already selected. Do not add others — the project only meets Fire TV's requirements.
+Already selected. Do not add others. The project only meets Fire TV's requirements.
 
 ## Code repository URL
 ```
@@ -111,7 +111,7 @@ by the sample rate, exactly. The entire project rests on one comparison:
 A duration that is approximately right turns that guarantee into an
 estimate. Verified against live Polly: a 15-word description returned
 152,444 bytes at 16 kHz mono, which is 4762.5ms from the sample count
-against 4763ms reported — the only discrepancy is integer rounding. The
+against 4763ms reported. The only discrepancy is integer rounding. The
 audio is measured back off the written file rather than the buffer in
 memory, which costs one read and removes a class of bug where the bytes
 measured and the bytes written are not the same.
@@ -125,7 +125,7 @@ fragmented HLS over HTTPS. This is not a convenience. Vega's media stack
 will not play file:// at all (MEDIA_ERR_SRC_NOT_SUPPORTED at 0ms) and will
 not play a progressive HTTPS MP4 either (decode error at 50ms). Only MSE
 through a patched Shaka Player works, so origin-served fMP4 HLS is the only
-path to playback. Content types are set explicitly — a playlist served as
+path to playback. Content types are set explicitly: a playlist served as
 application/octet-stream is rejected before Shaka sees it.
 
 Both sit behind interfaces. Polly implements the same Synthesizer contract
@@ -168,7 +168,7 @@ karanheart96
 
 ```
 A new open-source project, Apache-2.0, written entirely during the
-hackathon window — first commit 2026-09-20.
+hackathon window. First commit 2026-09-20.
 
 WHAT IT IS. A Fire TV / Vega OS player that generates audio description for
 content that has none, and provably never speaks over the dialogue.
@@ -183,14 +183,14 @@ single inequality:
 Both sides are measurements. audioDurationMs is read back off the rendered
 file; gap.durationMs comes from captions, which mark dialogue to the
 millisecond. Nothing in the decision is a model's opinion about how long it
-takes to say something. If the line does not fit it is discarded — not
+takes to say something. If the line does not fit it is discarded: not
 shortened, not faded under, not played late.
 
 The admission rule contains no model call, which is why the guarantee
 survives the model being wrong.
 
 WHY IT MATTERS. Audio description exists, and most content does not have
-it, because a person has to watch the film and write every line by hand —
+it, because a person has to watch the film and write every line by hand:
 six to twelve minutes of work per minute of video. At the rates that
 implies, a thousand-hour catalogue is on the order of a million dollars. So
 description goes to content someone can justify paying for, and archive
@@ -217,7 +217,7 @@ anywhere it is published):
     512s of narration placed around 77.2s of dialogue
       0 collisions
 
-One refusal is four words — "It settles, eye closing." — needing 1788ms in
+One refusal is four words, "It settles, eye closing.", needing 1788ms in
 a 1900ms gap. 138ms too long, so it does not play.
 
 189 tests. The verification is independent of the code that produced the
@@ -231,7 +231,7 @@ that corrupted the gap list could not also corrupt the thing checking it.
 ## [Optional] Feature Requests
 
 ```
-1. SHIP THE MANIFEST SCHEMA WITH THE SDK — Critical.
+1. SHIP THE MANIFEST SCHEMA WITH THE SDK, Critical.
    pkgmgr logs "Empty application icon file name for package ... It might
    not be defined in manifest." The message is right that it is not
    defined; it does not say what to define. No .toml in the installed SDK
@@ -242,26 +242,26 @@ that corrupted the gap list could not also corrupt the thing checking it.
    The icon is what a Fire TV home screen shows, so every developer meets
    this at submission time.
 
-2. A VIRTUAL DEVICE THAT CAN PLAY MEDIA — Critical.
+2. A VIRTUAL DEVICE THAT CAN PLAY MEDIA, Critical.
    The VVD has no audio output and cannot decode video, including Amazon's
    own reference stream. For any media application the emulator cannot
    demonstrate the application. This is the single largest barrier to
    building a Fire TV media app without buying hardware, and it is not
-   stated in the documentation — it has to be discovered by elimination.
+   stated in the documentation, it has to be discovered by elimination.
 
-3. ERRORS THAT NAME THE VALUE THEY RECEIVED — Important.
+3. ERRORS THAT NAME THE VALUE THEY RECEIVED, Important.
    `vega device launch-app -a <package-id>` fails with "App could not be
    determined", naming neither the identifier it got nor the one it wanted
    (the component id). The phrasing points at the install rather than the
    argument, which is the wrong place to look.
 
-4. A SUPPORTED PATH TO MSE PLAYBACK — Important.
+4. A SUPPORTED PATH TO MSE PLAYBACK, Important.
    Playing video at all requires vendoring and patching Shaka Player from a
    sample repository, via a build script that assumes `kepler` on PATH, a
    `python` binary macOS no longer ships, and an undocumented JDK. A
    supported package would remove a day of work from every media project.
 
-5. CORRECT THE DOCUMENTED PREREQUISITES — Nice-to-have.
+5. CORRECT THE DOCUMENTED PREREQUISITES, Nice-to-have.
    The macOS prerequisites list Homebrew, Rosetta 2 and nine packages. The
    installer's own gate requires curl, tar and jq, and the whole toolchain
    installs and builds without sudo. The current list wrongly tells
@@ -315,7 +315,7 @@ To run the app on the Vega Virtual Device:
   vega device launch-app -a com.fourkinc.gaptrack.main
 
 IMPORTANT, PLEASE READ: the Vega Virtual Device cannot decode video and has
-no audio output — not for our streams and not for Apple's own reference
+no audio output, not for our streams and not for Apple's own reference
 stream, which is how we established it is the device rather than our
 packaging (FRICTION.md entries 9 and 10). On the emulator the app therefore
 shows preview stills advanced by the playhead, and says so on screen. Every
@@ -323,7 +323,7 @@ decision, measurement and refusal is real; only the picture is substituted,
 and the substitution is labelled rather than hidden.
 
 To hear the actual result, play build/demo/sintel-described.mp4 after
-running demo:assets — that is the real film with the generated narration
+running demo:assets, that is the real film with the generated narration
 mixed in.
 ```
 
@@ -334,35 +334,35 @@ mixed in.
 ## 1 · Which developer tools, APIs, and SDKs did you use and for what?
 
 ```
-VEGA SDK 0.24.12044 / Vega Developer Tools — project generation, building,
+VEGA SDK 0.24.12044 / Vega Developer Tools, project generation, building,
 and the Vega Virtual Device.
 
-REACT NATIVE FOR VEGA 0.83 (@amazon-devices/react-native-kepler) — the whole
+REACT NATIVE FOR VEGA 0.83 (@amazon-devices/react-native-kepler), the whole
 application: library, player, D-pad focus via VegaFocusManager.
 
-@amazon-devices/react-native-w3cmedia 2.3.2 — media playback. VideoPlayer,
+@amazon-devices/react-native-w3cmedia 2.3.2, media playback. VideoPlayer,
 AudioPlayer with AudioContentType/AudioUsageType, KeplerVideoSurfaceView.
 Two elements at once: the programme and the description track.
 
-@amazon-devices/kepler-media-controls — transport controls.
+@amazon-devices/kepler-media-controls, transport controls.
 
-SHAKA PLAYER, Amazon-patched, vendored from AmazonAppDev/vega-video-sample —
+SHAKA PLAYER, Amazon-patched, vendored from AmazonAppDev/vega-video-sample -
 required, because MSE is the only path to playback on Vega.
 
-AMAZON POLLY (@aws-sdk/client-polly) — speech synthesis, PCM output so the
+AMAZON POLLY (@aws-sdk/client-polly), speech synthesis, PCM output so the
 duration is exact.
 
-AMAZON S3 — origin for fragmented HLS: programme, description track,
+AMAZON S3, origin for fragmented HLS: programme, description track,
 preview frames.
 
-ANTHROPIC API (@anthropic-ai/sdk, claude-opus-5) — writes each description
+ANTHROPIC API (@anthropic-ai/sdk, claude-opus-5), writes each description
 from sampled frames plus surrounding dialogue, under a word budget derived
 from the measured silence. Vision plus structured outputs.
 
-FFMPEG (ffmpeg-static) — frame extraction, HLS packaging, and mixing the
+FFMPEG (ffmpeg-static), frame extraction, HLS packaging, and mixing the
 described film.
 
-JEST + @testing-library/react-native — 189 tests, including a full
+JEST + @testing-library/react-native, 189 tests, including a full
 14.8-minute playthrough of the real manifest at the device's tick rate.
 ```
 
@@ -370,7 +370,7 @@ JEST + @testing-library/react-native — 189 tests, including a full
 
 ```
 VEGA SDK INSTALLER. Installed cleanly on a managed macOS machine with no
-admin rights, no Homebrew and no Rosetta — despite documentation saying all
+admin rights, no Homebrew and no Rosetta, despite documentation saying all
 three were required. NONINTERACTIVE=true worked exactly as expected.
 
 REACT NATIVE FOR VEGA. Standard React Native with Fabric and TurboModules.
@@ -390,7 +390,7 @@ is fast, stable, and removed any need to buy hardware. The GUI mode with
 the on-screen remote is genuinely good.
 
 ESLINT-PLUGIN-KEPLER. The system-distributed-library warnings are a real
-service — they flag a class of mistake that would otherwise surface at
+service, they flag a class of mistake that would otherwise surface at
 runtime on a device.
 
 AMAZON POLLY. Correct on the first call, and PCM output made exact
@@ -402,7 +402,7 @@ flat and unhurried rather than performed.
 
 ```
 THE VIRTUAL DEVICE CANNOT PLAY MEDIA. No audio output, and video does not
-decode — not our streams, and not Amazon's own reference stream, which is
+decode, not our streams, and not Amazon's own reference stream, which is
 how we know it is the device. For a media application this means the
 emulator cannot demonstrate the application. Neither limitation is
 documented; both have to be found by elimination. This is the single
@@ -417,7 +417,7 @@ not in the media documentation. (FRICTION.md 5.)
 
 THE SHAKA BUILD PATH IS FRAGILE. The script assumes `kepler` on PATH and a
 `python` binary macOS has not shipped since 12.3, and needs a JDK that is
-mentioned nowhere — the failure arrives 45 patches in, after several
+mentioned nowhere, the failure arrives 45 patches in, after several
 minutes of apparent success. (FRICTION.md 7, 8.)
 
 LICENCE HEADERS CONTRADICT THE REPOSITORY. Every file you must copy out of
@@ -429,7 +429,7 @@ the file header governs, for the one file they cannot avoid copying.
 DOCUMENTED RN VERSION IS WRONG. Docs say 0.72; SDK 0.24 generates 0.83.
 That pin was correct for SDK 0.22. (FRICTION.md 2.)
 
-`scalingmode` IS MISSPELLED in the public surface-view API — it should be
+`scalingmode` IS MISSPELLED in the public surface-view API, it should be
 scalingMode to match every other prop. It cannot be fixed without a
 breaking change, which is an argument for fixing it soon. (FRICTION.md 3.)
 
@@ -469,8 +469,8 @@ screen, and reaching it took days rather than hours, because:
     black, because it cannot decode
 
 That last point is what made it genuinely hard. Every failure looks like
-your own bug until you run the control — Amazon's own reference stream
-through the identical code path — and watch it fail too. We lost time to
+your own bug until you run the control, Amazon's own reference stream
+through the identical code path, and watch it fail too. We lost time to
 three wrong hypotheses before running that control, and it settled the
 question in five minutes. One line in the documentation saying the VVD
 cannot decode video would have saved all of it.
@@ -479,7 +479,7 @@ cannot decode video would have saved all of it.
 ## 5 · Would you build with these devices and services again?
 
 ```
-Yes — with one condition.
+Yes, with one condition.
 
 React Native for Vega is a genuinely good application platform. Standard
 React Native, modern version, Fabric and TurboModules, and a focus system
@@ -488,8 +488,8 @@ everything that is not media, which is most of an app. Polly and S3 did
 exactly what they should and the W3C media shape means existing knowledge
 transfers.
 
-The condition is hardware. Not because the emulator is poor in general —
-for UI it is very good — but because a media app cannot be validated on a
+The condition is hardware. Not because the emulator is poor in general -
+for UI it is very good, but because a media app cannot be validated on a
 device that cannot decode media. We built the entire project without a Fire
 TV stick and the engineering is sound, but the demo has to carry a caveat
 that nothing in our code caused. We would buy the device first next time.
@@ -508,24 +508,24 @@ and written to be acted on rather than to complain.
 ## AI tools leveraged
 ```
 Claude Code (Claude Opus) for development throughout, and the Anthropic API
-(claude-opus-5) as a runtime component — it writes every description from
+(claude-opus-5) as a runtime component, it writes every description from
 sampled frames and surrounding dialogue, under a word budget derived from
 the measured silence.
 ```
 
 ## Level of learning
-**[YOU]** — a dropdown. Pick honestly.
+**[YOU]** A dropdown. Pick honestly.
 
 ## Did you gain AI value for your career?
-**[YOU]** — a dropdown.
+**[YOU]** A dropdown.
 
 ## Age / jurisdiction / not-an-employee checkboxes
-**[YOU]** — tick if true.
+**[YOU]** Tick if true.
 
 ---
 
 # Still outstanding
 
-- [ ] **Demo video** — under 3:00, public on YouTube, English. See [`DEMO.md`](./DEMO.md).
+- [ ] **Demo video**, under 3:00, public on YouTube, English. See [`DEMO.md`](./DEMO.md).
 - [ ] Thumbnail image (3:2, under 5MB)
 - [ ] The **[YOU]** fields above
