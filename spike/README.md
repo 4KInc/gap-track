@@ -3,9 +3,13 @@
 Four probes against the assumptions the whole build rests on. Two of them can
 change what gets built, so nothing else starts until `RESULTS.md` has numbers.
 
-The probe code lives in [`../src/probes/`](../src/probes) and the harness screen
-in [`../src/SpikeScreen.tsx`](../src/SpikeScreen.tsx). This directory holds the
-method and the results.
+The probe code lives in [`../src/probes/`](../src/probes). This directory holds
+the method and the results.
+
+The harness screen that drove them (`src/SpikeScreen.tsx`) was removed once the
+real app replaced it; the probes themselves are kept because the numbers in
+[`RESULTS.md`](./RESULTS.md) are only as good as the code that produced them,
+and that code should stay readable.
 
 ## The questions
 
