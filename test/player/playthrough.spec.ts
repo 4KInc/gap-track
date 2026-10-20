@@ -27,8 +27,12 @@ import type { MediaPort } from '../../src/player/ports';
 import { mergeSpeech, parseCaptions } from '../../src/engine/gaps';
 import type { Cue } from '../../src/engine/types';
 
-const TRACK = '/tmp/gt/polly/sintel/track.json';
-const CAPTIONS = '/tmp/sintel/sintel_en.srt';
+// In the repo's own build directory, not /tmp. These used to point at a
+// scratch directory, so a reboot silently turned this suite into four skips
+// — which is exactly the failure the skip was designed to be honest about.
+// `npm run demo:assets` puts them here.
+const TRACK = 'build/demo/sintel-track.json';
+const CAPTIONS = 'build/demo/sintel_en.srt';
 const TICK_MS = 50;
 
 /** A media element that behaves like one, driven by the test's clock. */

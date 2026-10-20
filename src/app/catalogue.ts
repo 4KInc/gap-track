@@ -61,24 +61,19 @@ const TITLES: Title[] = [
     videoUrl:
       'https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8',
   },
-  {
-    id: 'bipbop',
-    name: 'Reference Stream',
-    attribution: 'Apple Inc. · developer test stream',
-    videoUrl:
-      'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8',
-    // CONTROL. Apple's own reference stream, reached through the identical
-    // code path with an empty cue list. If this decodes and ours does not,
-    // the fault is in our packaging. If neither decodes, the device cannot
-    // play video at all and nothing about our pipeline is implicated.
-    description: {
-      trackUrl:
-        'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/a1/prog_index.m3u8',
-      manifest: { titleId: 'bipbop', durationMs: 1_800_000, cues: [] },
-      provenance: 'CONTROL — Apple reference stream, no descriptions',
-    },
-  },
 ];
+
+/**
+ * The decode control lived here: Apple's own reference stream, reached through
+ * the identical code path with an empty cue list, so that a failure could be
+ * attributed to the device rather than to our packaging. It did fail, which is
+ * how FRICTION.md entry 10 could be written as a statement about the Vega
+ * Virtual Device rather than a suspicion about us.
+ *
+ * Removed from the catalogue once that question was settled. It is diagnostic
+ * scaffolding, and a library is a list of things somebody might watch. The
+ * control is still reproducible from the entry recorded in FRICTION.md.
+ */
 
 /**
  * Merge in whatever tracks have actually been built and published.
