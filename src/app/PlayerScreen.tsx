@@ -18,7 +18,7 @@ import { KeplerVideoSurfaceView } from '@amazon-devices/react-native-w3cmedia';
 import { DescriptionPlayer, type CueManifest, type DescriptionMode } from '../player/DescriptionPlayer';
 import { DEFAULT_CONFIG, type SchedulerConfig } from '../engine/types';
 import { Focusable } from './Focusable';
-import { TrustOverlay, type OverlayEvent } from './TrustOverlay';
+import { TrustOverlay, OVERLAY_WIDTH, type OverlayEvent } from './TrustOverlay';
 import { useVegaPlayers } from './useVegaPlayers';
 import { useProgrammeClock } from './useProgrammeClock';
 import { PreviewSurface, type PreviewStripInfo } from './PreviewSurface';
@@ -191,7 +191,7 @@ export function PlayerScreen({
 
       <View style={styles.scrim} pointerEvents="none" />
 
-      <View style={styles.chrome}>
+      <View style={[styles.chrome, showOverlay ? styles.chromeWithOverlay : null]}>
         <View style={styles.headRow}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.clock}>{players.ready ? fmt(playheadMs) : 'loading…'}</Text>
@@ -293,6 +293,11 @@ const styles = StyleSheet.create({
     bottom: space.safe,
     right: space.safe,
   },
+  // The overlay is a panel pinned to the right, not a layer over everything.
+  // When it is open the controls take the remaining column, so the safety
+  // margin buttons stay reachable and visible while it is on screen — which
+  // is the whole point of having both.
+  chromeWithOverlay: { right: OVERLAY_WIDTH + space.safe * 2 },
   headRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: space.md },
   title: { color: colour.ink, fontSize: type.title, marginRight: space.md },
   clock: { color: colour.inkMuted, fontSize: type.body, fontFamily: mono },
@@ -303,7 +308,7 @@ const styles = StyleSheet.create({
     marginBottom: space.xs,
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: space.sm },
-  marginButton: { minWidth: 120 },
+  marginButton: { minWidth: 92 },
   modeButton: { marginRight: space.sm },
   note: { color: colour.inkMuted, fontSize: type.label, marginTop: space.xs },
   diag: { color: colour.inkMuted, fontSize: type.tiny, fontFamily: mono, marginTop: space.sm },

@@ -16,7 +16,7 @@
  */
 
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import type { Decision, SchedulerConfig } from '../engine/types';
 import { colour, mono, radius, space, type } from './theme';
@@ -139,13 +139,31 @@ function HistoryRow({ event }: { event: OverlayEvent }) {
   );
 }
 
+/**
+ * How much horizontal room the overlay takes.
+ *
+ * Exported because the controls underneath have to yield exactly this much
+ * when it is open. A floating panel that covers the buttons is worse than no
+ * panel: the safety margin control is the one place a viewer can watch the
+ * trade-off happen, and the overlay is what shows them the result.
+ *
+ * Proportional rather than fixed. The Vega Virtual Device reports a window
+ * far narrower than a 1080p television's logical width, and a hard 620 there
+ * left the controls a sliver too narrow to use — the margin buttons were
+ * reachable by remote but invisible under the panel.
+ */
+export const OVERLAY_WIDTH = Math.min(
+  620,
+  Math.round(Dimensions.get('window').width * 0.52),
+);
+
 const styles = StyleSheet.create({
   root: {
     position: 'absolute',
     right: space.safe,
     top: space.safe,
     bottom: space.safe,
-    width: 620,
+    width: OVERLAY_WIDTH,
     backgroundColor: colour.scrim,
     borderRadius: radius.md,
     borderWidth: 1,
