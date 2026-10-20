@@ -26,8 +26,8 @@ describe, and everything else — archive film, independent distribution, region
 and community broadcasting, educational libraries — goes undescribed. Not
 because the technology is missing, but because the economics never close.
 
-For comparison, this pipeline described a 14.8-minute film for **$0.13**, a
-measured **$0.53 per described hour**.
+For comparison, this pipeline described a 14.8-minute film for **$0.14**, a
+measured **$0.56 per described hour**.
 
 ## What this is
 

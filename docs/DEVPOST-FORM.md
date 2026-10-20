@@ -116,8 +116,8 @@ audio is measured back off the written file rather than the buffer in
 memory, which costs one read and removes a class of bug where the bytes
 measured and the bytes written are not the same.
 
-Neural voices, Joanna by default. Measured cost: 8,109 characters for a
-14.8-minute film, which is $0.13 for the film and $0.53 per described
+Neural voices, Joanna by default. Measured cost: 8,690 characters for a
+14.8-minute film, which is $0.14 for the film and $0.56 per described
 hour.
 
 S3 serves the programme, the description track and the preview frames as
@@ -195,7 +195,7 @@ six to twelve minutes of work per minute of video. At the rates that
 implies, a thousand-hour catalogue is on the order of a million dollars. So
 description goes to content someone can justify paying for, and archive
 film, independent distribution, regional broadcasting and educational
-libraries go without. This pipeline described a 14.8-minute film for $0.13.
+libraries go without. This pipeline described a 14.8-minute film for $0.14.
 
 The hard part is not generating a description. It is generating one that is
 safe to play, because a description that talks over the dialogue has made

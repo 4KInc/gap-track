@@ -38,8 +38,8 @@ measured and the thing written are not the same bytes.
 markedly better at the register description needs: flat, unhurried, and not
 acting.
 
-**Measured cost:** 98 descriptions for a 14.8-minute film came to 8,109
-characters — **$0.13 for the film, $0.53 per described hour** at the $16/1M
+**Measured cost:** 99 descriptions for a 14.8-minute film came to 8,690
+characters — **$0.14 for the film, $0.56 per described hour** at the $16/1M
 neural rate. For comparison, professionally authored audio description is
 usually quoted in the high hundreds to low thousands of dollars per hour.
 
