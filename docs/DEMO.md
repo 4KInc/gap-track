@@ -109,7 +109,7 @@ Numbers, measured on this film:
 the verifier:
 
 ```
-$ npx tsx scripts/verify-no-overlap.ts track.json sintel_en.srt
+$ npm run demo:verify
 99 cues against 26 speech runs
   narration      512.0s
   dialogue       77.2s
@@ -138,6 +138,8 @@ $ npx tsx scripts/verify-no-overlap.ts track.json sintel_en.srt
 
 ## Before you record
 
+- [ ] Demo assets present: `npm run demo:assets` (restores anything a reboot cleared)
+- [ ] Verifier runs: `npm run demo:verify`
 - [ ] Device up: `vega virtual-device start --gui`
 - [ ] App current: `npm run build:release && vega device install-app -p <vpkg>`
 - [ ] Start from the library screen, not mid-playback

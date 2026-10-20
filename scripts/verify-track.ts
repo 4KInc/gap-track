@@ -17,15 +17,19 @@
  * Exits non-zero on any violation, so it can gate a release.
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { decide } from '../src/engine/admission';
 import { DEFAULT_CONFIG } from '../src/engine/types';
 import type { Cue } from '../src/engine/types';
 
-const path = process.argv[2];
-if (!path) {
-  process.stderr.write('usage: verify-track.ts <track.json>\n');
+const path = process.argv[2] ?? 'build/demo/sintel-track.json';
+if (!existsSync(path)) {
+  process.stderr.write(
+    `no track at ${path}\n` +
+      'usage: verify-track.ts [track.json]\n' +
+      'build the demo assets with: npm run demo:assets\n',
+  );
   process.exit(2);
 }
 

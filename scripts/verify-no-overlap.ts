@@ -21,15 +21,29 @@
  * transcribe it, so nobody is talking and a description may play across them.
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { parseCaptions, mergeSpeech } from '../src/engine/gaps';
 import type { Cue } from '../src/engine/types';
 
-const [trackPath, captionsPath] = process.argv.slice(2);
-if (!trackPath || !captionsPath) {
-  process.stderr.write('usage: verify-no-overlap.ts <track.json> <captions.srt>\n');
-  process.exit(2);
+// Defaults to the demo assets, which live in the repo rather than in /tmp:
+// this command is in the demo script, and a scratch directory that a reboot
+// clears is not something to find out about while recording.
+const trackPath = process.argv[2] ?? 'build/demo/sintel-track.json';
+const captionsPath = process.argv[3] ?? 'build/demo/sintel_en.srt';
+
+for (const [what, where] of [
+  ['track', trackPath],
+  ['captions', captionsPath],
+]) {
+  if (!existsSync(where)) {
+    process.stderr.write(
+      `no ${what} at ${where}\n` +
+        'usage: verify-no-overlap.ts [track.json] [captions.srt]\n' +
+        'build the demo assets with: npm run demo:assets\n',
+    );
+    process.exit(2);
+  }
 }
 
 const { cues } = JSON.parse(readFileSync(trackPath, 'utf8')) as { cues: Cue[] };

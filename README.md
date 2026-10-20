@@ -82,8 +82,8 @@ needing 1788ms in a 1900ms gap. 138ms too long, so it does not play.
 Verified two ways, independently of the code that built it:
 
 ```bash
-npx tsx scripts/verify-track.ts   build/demo/sintel-track.json
-npx tsx scripts/verify-no-overlap.ts build/demo/sintel-track.json sintel_en.srt
+npm run demo:assets   # fetch the film and captions (CC-BY, not in the repo)
+npm run demo:verify   # both checks against the built track
 ```
 
 The first re-checks every cue against the engine. The second replays each cue as

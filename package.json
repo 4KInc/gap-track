@@ -16,7 +16,9 @@
     "build:debug": "react-native build-vega --build-type Debug",
     "build:app": "npm-run-all build:release",
     "build": "npm-run-all build:release",
-    "release": "npm-run-all lint test build:app"
+    "release": "npm-run-all lint test build:app",
+    "demo:assets": "bash scripts/demo-assets.sh",
+    "demo:verify": "npx tsx scripts/verify-track.ts && npx tsx scripts/verify-no-overlap.ts"
   },
   "dependencies": {
     "@amazon-devices/kepler-media-controls": "~1.0.25",
