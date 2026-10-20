@@ -121,10 +121,13 @@ $ npm run --silent demo:verify
 > Captions give the dialogue to the millisecond, so inverting them gives the
 > silences. Claude writes to a word budget derived from each silence and
 > declines when there's nothing worth saying. Polly speaks it as PCM, so the
-> duration is exact. Then it's measured, and admitted or refused. Five hundred
-> and twelve seconds of narration placed around seventy-seven seconds of
-> dialogue, and not one millisecond of overlap — checked against the caption
-> file, not against our own arithmetic.
+> duration is exact. Then it's measured, and admitted or refused.
+>
+> This film is fourteen minutes long and people are speaking for seventy-seven
+> seconds of it — under nine percent. We added eight and a half minutes of
+> narration into the rest, and not one millisecond of it lands on a word of
+> dialogue. And that's checked against Blender's own subtitle file, not against
+> our arithmetic — so a bug in how we find silences couldn't hide itself.
 
 ---
 
