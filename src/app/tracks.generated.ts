@@ -1016,7 +1016,7 @@ export const ATTACHED: Record<string, AttachedTrack> = {
         }
       ]
     },
-    "provenance": "Generated 2026-10-14 · 99 descriptions, 2 refused",
+    "provenance": "Generated 2026-10-20",
     "preview": {
       "baseUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/sintel/preview/",
       "fps": 2,
