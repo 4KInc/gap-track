@@ -60,14 +60,19 @@ function Row({
   return (
     <View style={styles.row}>
       <View style={styles.meta}>
-        <Text style={styles.name}>{title.name}</Text>
-        <Text style={styles.attribution}>{title.attribution}</Text>
-
-        <View style={[styles.badge, has ? styles.badgeOn : styles.badgeOff]}>
-          <Text style={[styles.badgeText, has ? styles.badgeTextOn : styles.badgeTextOff]}>
-            {has ? 'AUDIO DESCRIPTION' : 'NO AUDIO DESCRIPTION'}
-          </Text>
+        {/* Badge beside the title rather than beneath it. Four titles of
+            10-foot type do not fit the screen at four stacked lines each,
+            and the badge is a property of the title — reading it on the
+            same line is also how a viewer scans the list. */}
+        <View style={styles.nameRow}>
+          <Text style={styles.name}>{title.name}</Text>
+          <View style={[styles.badge, has ? styles.badgeOn : styles.badgeOff]}>
+            <Text style={[styles.badgeText, has ? styles.badgeTextOn : styles.badgeTextOff]}>
+              {has ? 'AUDIO DESCRIPTION' : 'NO AUDIO DESCRIPTION'}
+            </Text>
+          </View>
         </View>
+        <Text style={styles.attribution}>{title.attribution}</Text>
 
         {title.description ? (
           <Text style={styles.provenance}>{title.description.provenance}</Text>
@@ -107,12 +112,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colour.line,
   },
   meta: { flex: 1, paddingRight: space.lg },
-  name: { color: colour.ink, fontSize: type.body },
+  nameRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  name: { color: colour.ink, fontSize: type.body, marginRight: space.sm },
   attribution: { color: colour.inkMuted, fontSize: type.tiny, marginTop: 2 },
 
   badge: {
-    alignSelf: 'flex-start',
-    marginTop: space.sm,
+    alignSelf: 'center',
     paddingVertical: 3,
     paddingHorizontal: space.xs,
     borderRadius: radius.sm,
@@ -123,5 +128,5 @@ const styles = StyleSheet.create({
   badgeTextOn: { color: colour.accent },
   badgeTextOff: { color: colour.signal },
 
-  provenance: { color: colour.inkMuted, fontSize: type.tiny, marginTop: space.xs },
+  provenance: { color: colour.inkMuted, fontSize: type.tiny, marginTop: 2 },
 });
