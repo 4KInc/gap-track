@@ -109,7 +109,7 @@ Numbers, measured on this film:
 the verifier:
 
 ```
-$ npm run demo:verify
+$ npm run --silent demo:verify
 99 cues against 26 speech runs
   narration      512.0s
   dialogue       77.2s
@@ -139,7 +139,7 @@ $ npm run demo:verify
 ## Before you record
 
 - [ ] Demo assets present: `npm run demo:assets` (restores anything a reboot cleared)
-- [ ] Verifier runs: `npm run demo:verify`
+- [ ] Verifier runs: `npm run --silent demo:verify` (--silent drops npm's own two header lines)
 - [ ] Device up: `vega virtual-device start --gui`
 - [ ] App current: `npm run build:release && vega device install-app -p <vpkg>`
 - [ ] Start from the library screen, not mid-playback
