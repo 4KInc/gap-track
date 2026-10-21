@@ -46,9 +46,64 @@ Sintel (c) copyright Blender Foundation, durian.blender.org, licensed CC-BY 3.0.
 
 ## Thumbnail
 
+Two routes. A real frame is the stronger one, so try it first.
+
+### Option A: a frame from the video
+
 **Select from video**, and take a frame from shot 3 or 4 showing the admission
-arithmetic with both operands labelled. It is the one image that states the
-whole project, and no other submission will have anything resembling it.
+arithmetic with both operands labelled. No other submission will have anything
+resembling it, and it is genuinely what the app looks like.
+
+### Option B: generated art
+
+Prompt for Gemini (Imagen). Generate the art clean and set the text yourself in
+any editor, because image models still misspell short labels and a thumbnail
+with a typo reads as careless.
+
+```
+A 16:9 dark editorial illustration for a technology video thumbnail.
+
+Subject: two audio waveforms on a near-black background, arranged
+horizontally like a timeline. The upper waveform is dense and busy,
+rendered in warm amber, representing speech. It stops abruptly, leaving a
+wide empty stretch of flat line, then resumes further right. Inside that
+empty stretch, and clearly not touching either side of it, sits a second
+smaller waveform in bright teal, representing narration placed into the
+silence. The teal waveform is noticeably shorter than the gap it occupies,
+with visible clearance at both ends.
+
+Above the gap, a thin precise measurement bracket spans the empty stretch,
+the kind used on an engineering drawing, with small tick marks at each end.
+A second shorter bracket spans only the teal waveform, nested beneath the
+first. Leave the brackets unlabelled.
+
+Style: precise, technical, restrained. Flat vector illustration with
+crisp edges, not 3D, no glow, no lens flare, no bloom. Generous negative
+space. The composition should read instantly at thumbnail size.
+
+Palette, use exactly: background #0C1113, speech waveform #D99A3E,
+narration waveform #4FBAC1, brackets and tick marks #8B9A9B, thin
+horizontal baseline #253032.
+
+Composition: waveforms occupying the lower two thirds, centre-left
+weighted, with clear empty space in the upper right for a title to be
+added later. No text, no letters, no numbers anywhere in the image.
+```
+
+Then set two lines of text over the empty upper right, in a clean sans at
+large size:
+
+```
+NEVER TALKS
+OVER DIALOGUE
+```
+
+White on the dark ground, with the word NEVER in the teal `#4FBAC1`.
+
+**Why this image.** It is the product drawn literally: narration sized to
+fit a measured silence, with room left at both ends. Somebody who watches
+the video will recognise it afterwards, which a generic waveform or a
+picture of a television would not give you.
 
 ---
 
