@@ -204,3 +204,26 @@ whenBuilt('a whole film, ticked at the device rate', () => {
     expect(player.speakingText()).toBeNull();
   });
 });
+
+describe('what the viewer is actually choosing', () => {
+  it('yields less narration the more silence is demanded', () => {
+    // The control is named for the requirement, not the result, because the
+    // numbers read backwards otherwise: asking for MORE space around speech
+    // produces LESS description. If that relationship ever inverted, the
+    // label would be a lie.
+    if (!have) return;
+    const track = JSON.parse(readFileSync(TRACK, 'utf8')) as { cues: Cue[] };
+
+    const kept = [250, 750, 1_500, 3_000].map(
+      (safetyMarginMs) =>
+        track.cues.filter(
+          (c) => c.audioDurationMs + safetyMarginMs <= c.gap.durationMs,
+        ).length,
+    );
+
+    for (let i = 1; i < kept.length; i++) {
+      expect(kept[i]).toBeLessThanOrEqual(kept[i - 1]);
+    }
+    expect(kept[0]).toBeGreaterThan(kept[kept.length - 1]);
+  });
+});

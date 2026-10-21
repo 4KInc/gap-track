@@ -32,6 +32,15 @@ export interface CueManifest {
   titleId: string;
   durationMs: number;
   cues: Cue[];
+  /**
+   * Silence already trimmed from both ends of every gap at build time,
+   * before admission saw them.
+   *
+   * Optional because a track built before this was recorded does not carry
+   * it, and the right behaviour then is to say less rather than to assume a
+   * default that may not be what that track used.
+   */
+  gapPadMs?: number;
 }
 
 export interface DescriptionPlayerOptions {

@@ -50,14 +50,28 @@ const MODES: Array<{ mode: DescriptionMode; label: string }> = [
 ];
 
 /**
- * Offered margins.
+ * How much silence the viewer wants guaranteed around speech.
  *
- * 250ms is the default and the figure every published number was measured
- * at. The larger ones are not padding for its own sake: at 1500ms a real
- * film starts refusing descriptions that fit comfortably at 250ms, which is
- * the trade made visible rather than described.
+ * Named for what they are choosing, not for what comes out. A viewer is not
+ * setting "how much description" directly; they are setting how close a
+ * description may come to a line of dialogue, and the amount of description
+ * follows from that. Labelling it the other way round hides the mechanism
+ * and makes the numbers read backwards, because a LARGER requirement yields
+ * LESS narration.
+ *
+ * Milliseconds are deliberately not the label. A viewer navigating by
+ * remote, hearing these read aloud, cannot act on "one thousand five
+ * hundred milliseconds". The figure shown beside each is the silence they
+ * will actually hear, which is this margin plus the padding already taken
+ * off every gap when it was found — and the app only claims that total when
+ * the track told it the padding. See gapPadMs.
  */
-const MARGINS = [250, 750, 1_500, 3_000];
+const SPACING: Array<{ marginMs: number; label: string }> = [
+  { marginMs: 250, label: 'Close' },
+  { marginMs: 750, label: 'Comfortable' },
+  { marginMs: 1_500, label: 'Generous' },
+  { marginMs: 3_000, label: 'Wide' },
+];
 
 export function PlayerScreen({
   title,
@@ -104,6 +118,16 @@ export function PlayerScreen({
     config?.safetyMarginMs ?? DEFAULT_CONFIG.safetyMarginMs,
   );
   const merged: SchedulerConfig = { ...DEFAULT_CONFIG, ...config, safetyMarginMs: marginMs };
+
+  // What the viewer will actually hear, which is the margin plus the padding
+  // already shaved off both ends of every gap when it was found. The track
+  // reports that padding; when it does not, the app shows the margin alone
+  // rather than inventing the rest, because a total it was never told is a
+  // number it cannot stand behind.
+  const clearanceLabel =
+    manifest.gapPadMs === undefined
+      ? `${marginMs}ms`
+      : `${marginMs + manifest.gapPadMs}ms of silence`;
 
   // Build the engine once both players exist, and give it the cue list.
   useEffect(() => {
@@ -212,23 +236,29 @@ export function PlayerScreen({
           ))}
         </View>
 
-        <Text style={styles.settingLabel}>SAFETY MARGIN · {marginMs}ms</Text>
+        <Text style={styles.settingLabel}>
+          SPACE AROUND DIALOGUE · {clearanceLabel}
+        </Text>
         <View style={styles.row}>
-          {MARGINS.map((ms) => (
+          {SPACING.map((s) => (
             <Focusable
-              key={ms}
-              label={`${ms}ms`}
+              key={s.marginMs}
+              label={s.label}
               compact
-              selected={marginMs === ms}
+              selected={marginMs === s.marginMs}
               disabled={!players.ready}
               onPress={() => {
-                setMarginMs(ms);
-                engine.current?.setSafetyMargin(ms);
+                setMarginMs(s.marginMs);
+                engine.current?.setSafetyMargin(s.marginMs);
               }}
               style={styles.marginButton}
             />
           ))}
         </View>
+        <Text style={styles.settingHint}>
+          Narration always stops at least this long before anyone speaks.
+          Asking for more means hearing fewer descriptions.
+        </Text>
 
         <View style={styles.row}>
           <Focusable
@@ -309,6 +339,13 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: space.sm },
   marginButton: { minWidth: 92 },
+  settingHint: {
+    color: colour.inkMuted,
+    fontSize: type.tiny,
+    maxWidth: 560,
+    marginTop: 2,
+    marginBottom: space.sm,
+  },
   modeButton: { marginRight: space.sm },
   note: { color: colour.inkMuted, fontSize: type.label, marginTop: space.xs },
   diag: { color: colour.inkMuted, fontSize: type.tiny, fontFamily: mono, marginTop: space.sm },

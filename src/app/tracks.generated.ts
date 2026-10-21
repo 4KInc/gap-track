@@ -1014,9 +1014,10 @@ export const ATTACHED: Record<string, AttachedTrack> = {
           "audioDurationMs": 5050,
           "trackOffsetMs": 880062
         }
-      ]
+      ],
+      "gapPadMs": 150
     },
-    "provenance": "Generated 2026-10-20",
+    "provenance": "Generated 2026-10-21",
     "preview": {
       "baseUrl": "https://gap-track-110428898688.s3.us-east-1.amazonaws.com/sintel/preview/",
       "fps": 2,

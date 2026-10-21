@@ -74,12 +74,13 @@ export async function buildTrack(opts: BuildOptions): Promise<BuildResult> {
   log(`${opts.titleId}: ${(durationMs / 1000 / 60).toFixed(1)} min`);
 
   const speech: SpeechInterval[] = parseCaptions(await readFile(opts.captionsPath, 'utf8'));
-  const gaps = gapsFromSpeech(speech, {
+  const gapOptions = {
     ...DEFAULT_GAP_OPTIONS,
     minGapMs: opts.minGapMs ?? DEFAULT_GAP_OPTIONS.minGapMs,
     padMs: opts.padMs ?? DEFAULT_GAP_OPTIONS.padMs,
     durationMs,
-  });
+  };
+  const gaps = gapsFromSpeech(speech, gapOptions);
   log(`${speech.length} spoken runs, ${gaps.length} describable gaps`);
 
   const cachePath = join(workDir, 'descriptions.json');
@@ -156,6 +157,16 @@ export async function buildTrack(opts: BuildOptions): Promise<BuildResult> {
     descriptionTrackUrl: 'hls/index.m3u8',
     /** Packaging offset, so the device can correct rather than drift. */
     trackLatencyMs: packaged.latencyMs,
+    /**
+     * Breathing room already taken off both ends of every gap when it was
+     * found, before admission ever saw it.
+     *
+     * Recorded because the app cannot otherwise tell a viewer how much
+     * silence they will actually hear: the safety margin alone understates
+     * it by this much, and hardcoding a build-time constant in the player
+     * would be a number the player had not been told.
+     */
+    gapPadMs: gapOptions.padMs,
     config,
     cues: track.cues,
     rejected: track.rejected,

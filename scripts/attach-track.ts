@@ -67,6 +67,10 @@ async function main(): Promise<void> {
     titleId: built.titleId,
     durationMs: built.durationMs,
     cues: built.cues,
+    // Forwarded, not defaulted. A track built before the pipeline recorded
+    // this has no honest value for it, and the app says less in that case
+    // rather than claiming a figure nobody measured for that track.
+    ...(built.gapPadMs === undefined ? {} : { gapPadMs: built.gapPadMs }),
   };
 
   // Just the date and the fact it was generated. The cue and refusal counts
