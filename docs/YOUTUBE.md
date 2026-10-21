@@ -19,7 +19,11 @@ else is claiming.
 ## Description
 
 ```
-Most films have no audio description because a person has to watch the film and write every line by hand. The Gap Track generates it instead, and proves it will never speak over the dialogue: every line is checked against one inequality, speech duration plus safety margin must fit inside the measured silence, where both sides are measurements rather than estimates. The speech is read off the rendered audio file; the silence comes from the caption track, which marks dialogue to the millisecond. If a line does not fit it is discarded, not shortened and not faded under. On Sintel (14.8 minutes, undescribed anywhere it is published) that produced 99 descriptions across 107 silences, with 6 declined for having nothing worth saying and 2 refused for not fitting: 512 seconds of narration placed around 77.2 seconds of dialogue, zero collisions, for $0.14. One of the refusals is four words. "It settles, eye closing." It needed 1788ms, the gap was 1900ms, so 138 milliseconds too long and it does not play.
+Most films have no audio description, because somebody has to sit down, watch the whole thing, and write every line by hand. The Gap Track writes it instead. The hard part isn't writing the description, it's knowing when not to play one, because narration that lands on top of the dialogue has made the film worse rather than better. So every line gets checked against one rule before it is allowed to play. How long the speech actually is, plus a safety margin, has to fit inside the silence it is aimed at. Both of those are measured. The speech is read back off the audio file after it is made, and the silence comes from the caption track, which marks dialogue down to the millisecond. If a line doesn't fit, it gets thrown away. Not shortened, not quietly faded under the dialogue, not played a moment late.
+
+Sintel is 14.8 minutes long and has no audio description anywhere it is published. This wrote 99 of them across 107 silences. Six it declined, because nothing had changed on screen worth mentioning. Two it refused, because they would not have fit. That is eight and a half minutes of narration placed around seventy-seven seconds of dialogue, without ever landing on a word of it, and it cost fourteen cents.
+
+One of the two it refused is four words long. "It settles, eye closing." It needed 1788 milliseconds. The gap was 1900. With the safety margin that is 138 milliseconds too long, so you never hear it.
 
 00:00 The problem
 00:22 What it sounds like
@@ -31,7 +35,9 @@ Most films have no audio description because a person has to watch the film and 
 Code: https://github.com/4KInc/gap-track
 Friction log: https://github.com/4KInc/gap-track/blob/main/FRICTION.md
 
-Built for the Build, Ship, Shape: Amazon Developer Hackathon. Fire TV / Vega OS, React Native 0.83, Amazon Polly, Amazon S3, Claude. The Vega Virtual Device cannot decode video or play audio, including Amazon's own reference stream, so the app shows preview stills and says so on screen; every decision and refusal is real.
+Built for the Build, Ship, Shape: Amazon Developer Hackathon, on Fire TV and Vega OS, with React Native 0.83, Amazon Polly, Amazon S3 and Claude.
+
+One thing worth saying about the picture. The Vega Virtual Device cannot decode video or play audio, and that is true of Amazon's own reference stream as well as ours, which is how we know it is the emulator and not our packaging. So the app falls back to showing stills from the pipeline, and tells you on screen that it is doing it. Every decision, measurement and refusal you see is real.
 
 Sintel (c) copyright Blender Foundation, durian.blender.org, licensed CC-BY 3.0.
 ```
